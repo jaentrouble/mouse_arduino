@@ -33,7 +33,7 @@ def index():
 def generator():
     global vs, interpreter
     while True:
-        frame = vs.read()
+        frame = vs.read().copy()
         resized_frame = cv2.resize(frame, dsize=input_size_wh)
         interpreter.set_tensor(input_idx,resized_frame[np.newaxis,...])
         interpreter.invoke()
