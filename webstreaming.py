@@ -20,8 +20,8 @@ input_size_wh = (interpreter.get_input_details()[0]['shape'][3],
                  interpreter.get_input_details()[0]['shape'][2],)
 
 output_idx = interpreter.get_output_details()[0]['index']
-output_size_wh = (interpreter.get_output_details()[0]['shape'][3],
-                  interpreter.get_output_details()[0]['shape'][2],)
+output_size_wh = (interpreter.get_output_details()[0]['shape'][2],
+                  interpreter.get_output_details()[0]['shape'][1],)
 output_size_hw = (output_size_wh[1], output_size_wh[0])
 
 resize_ratio = np.divide(FRAME_RES_HW,output_size_hw)
