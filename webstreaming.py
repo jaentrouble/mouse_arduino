@@ -37,6 +37,6 @@ if __name__ == '__main__':
     parser.add_argument('-p','--port', type=int,dest='port')
     args = parser.parse_args()
 
-    app.run(host=args.ip, port=args.port, debug=True, threaded=False, use_reloader=False)
+    app.run(host=args.ip, port=args.port, debug=True, threaded=True, use_reloader=False)
 
 vs.stop()
