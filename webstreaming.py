@@ -4,9 +4,10 @@ from flask import Flask, render_template, Response
 import cv2
 import argparse
 
+vs = VideoStream(usePiCamera=True, resolution=(384,256),framerate=10).start()
+
 app = Flask(__name__)
 
-vs = VideoStream(usePiCamera=True, resolution=(384,256),framerate=10).start()
 
 @app.route('/')
 def index():
