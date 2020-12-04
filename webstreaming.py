@@ -41,10 +41,10 @@ def generator():
         pos = np.unravel_index(heatmap.flatten().argmax(),output_size_hw)
         pos = np.multiply(pos, resize_ratio).astype(np.int)
         r, c = pos
-        r_min = max(r-10,0)
-        r_max = r+10
-        c_min = max(c-10,0)
-        c_max = c+10
+        r_min = max(r-5,0)
+        r_max = r+5
+        c_min = max(c-5,0)
+        c_max = c+5
         frame[r_min:r_max,c_min:c_max] = [0,255,0]
         flag, encoded_image = cv2.imencode('.jpg',frame)
         if not flag:
