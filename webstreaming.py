@@ -8,7 +8,7 @@ app = Flask(__name__)
 
 vs = VideoStream(usePiCamera=True, resolution=(384,256),framerate=10).start()
 
-@app.route('/'):
+@app.route('/')
 def index():
     return render_template('index.html')
 
