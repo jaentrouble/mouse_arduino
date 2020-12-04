@@ -35,7 +35,7 @@ def generator():
     while True:
         frame = vs.read()
         resized_frame = cv2.resize(frame, dsize=input_size_wh)
-        interpreter.set_tensor(input_idx,resized_frame)
+        interpreter.set_tensor(input_idx,resized_frame[np.newaxis,...])
         interpreter.invoke()
         heatmap = np.squeeze(interpreter.get_tensor(output_idx))
         pos = np.unravel_index(heatmap.flatten().argmax(),output_size_hw)
