@@ -16,8 +16,8 @@ interpreter = tflite.Interpreter('savedmodels/mobv3_small_head_quan.tflite')
 interpreter.allocate_tensors()
 
 input_idx = interpreter.get_input_details()[0]['index']
-input_size_wh = (interpreter.get_input_details()[0]['shape'][3],
-                 interpreter.get_input_details()[0]['shape'][2],)
+input_size_wh = (interpreter.get_input_details()[0]['shape'][2],
+                 interpreter.get_input_details()[0]['shape'][1],)
 
 output_idx = interpreter.get_output_details()[0]['index']
 output_size_wh = (interpreter.get_output_details()[0]['shape'][2],
