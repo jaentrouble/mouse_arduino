@@ -15,6 +15,7 @@ def index():
 
 def generator():
     while True:
+        global vs
         frame = vs.read()
         flag, encoded_image = cv2.imencode('.jpg',frame)
         if not flag:
