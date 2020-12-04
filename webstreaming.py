@@ -16,7 +16,6 @@ def index():
 def generator():
     global vs
     while True:
-        
         frame = vs.read()
         flag, encoded_image = cv2.imencode('.jpg',frame)
         if not flag:
@@ -38,6 +37,6 @@ if __name__ == '__main__':
     parser.add_argument('-p','--port', type=int,dest='port')
     args = parser.parse_args()
 
-    app.run(host=args.ip, port=args.port, debug=True, threaded=False)
+    app.run(host=args.ip, port=args.port, debug=True, threaded=False, use_reloader=False)
 
 vs.stop()
