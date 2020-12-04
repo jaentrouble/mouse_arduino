@@ -4,7 +4,7 @@ from flask import Flask, render_template, Response
 import cv2
 import argparse
 
-vs = VideoStream(usePiCamera=True, resolution=(360,240),framerate=10).start()
+vs = VideoStream(usePiCamera=True, resolution=(640,480),framerate=10).start()
 
 app = Flask(__name__)
 
