@@ -12,7 +12,7 @@ vs = VideoStream(usePiCamera=True, resolution=FRAME_RES,framerate=10).start()
 
 app = Flask(__name__)
 
-interpreter = tflite.Interpreter('savedmodels/mobv3_small_head_quan.tflite')
+interpreter = tflite.Interpreter('savedmodels/mobv3_small_head.tflite')
 interpreter.allocate_tensors()
 
 input_idx = interpreter.get_input_details()[0]['index']
