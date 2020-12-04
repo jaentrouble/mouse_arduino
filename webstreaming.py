@@ -14,8 +14,9 @@ def index():
     return render_template('index.html')
 
 def generator():
+    global vs
     while True:
-        global vs
+        
         frame = vs.read()
         flag, encoded_image = cv2.imencode('.jpg',frame)
         if not flag:
