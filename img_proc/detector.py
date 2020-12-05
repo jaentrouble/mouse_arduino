@@ -65,7 +65,6 @@ class ImageProcessor():
         self._stopped = False
 
     def start(self):
-        self._rec_start = time.time()
         self.reset_writer()
         self._vs = VideoStream(
             usePiCamera=True,
@@ -82,6 +81,7 @@ class ImageProcessor():
         return self
 
     def reset_writer(self):
+        self._rec_start = time.time()
         if self._writer is not None:
             self._writer.stdin.close()
         now = datetime.now()
