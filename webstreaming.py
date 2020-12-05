@@ -10,7 +10,7 @@ from img_proc.detector import ImageProcessor
 parser = argparse.ArgumentParser()
 parser.add_argument('-i','--ip',dest='ip', default='127.0.0.1')
 parser.add_argument('-p','--port', type=int,dest='port')
-parser.add_argument('-v','--viddir', type=str, dest='vid_dir')
+parser.add_argument('-v','--viddir', type=str,required=True, dest='vid_dir')
 args = parser.parse_args()
 
 FRAME_RES = (640,480)
