@@ -71,6 +71,8 @@ class ImageProcessor():
             resolution=self.frame_res,
             framerate=self.framerate,
         ).start()
+        print('initiating...')
+        time.sleep(2)
 
         t = Thread(target=self.update, args=())
         t.daemon = True
@@ -102,7 +104,7 @@ class ImageProcessor():
                 if self._writer is not None:
                     self._writer.release()
                 return
-                
+
             new_frame = self._vs.read().copy()
             resized_frame = cv2.resize(new_frame, dsize=self.input_size_wh)
             self.interpreter.set_tensor(
