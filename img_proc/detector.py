@@ -1,5 +1,6 @@
 from imutils.video import VideoStream
 import cv2
+import ffmpeg
 import tflite_runtime.interpreter as tflite
 import numpy as np
 from pathlib import Path
@@ -53,7 +54,7 @@ class ImageProcessor():
         self.output_size_hw = (self.output_size_wh[1], self.output_size_wh[0])
         self.resize_ratio = np.divide(self.frame_res_hw, self.output_size_hw)
 
-        self._fourcc = cv2.VideoWriter_fourcc(*'MPEG')
+        # self._fourcc = cv2.VideoWriter_fourcc(*'MPEG')
         self._writer = None
 
         # Dummy frame
@@ -82,19 +83,26 @@ class ImageProcessor():
 
     def reset_writer(self):
         if self._writer is not None:
-            self._writer.release()
+            self._writer.stdin.close()
         now = datetime.now()
         rec_dir = self.vid_dir/now.strftime('%m_%d')
         if not rec_dir.exists():
             rec_dir.mkdir(parents=True)
         rec_name = now.strftime('%m_%d_%H_%M.ts')
-        self._writer = cv2.VideoWriter(
-            str(rec_dir/rec_name),
-            self._fourcc,
-            self.framerate,
-            self.frame_res,
+        # self._writer = cv2.VideoWriter(
+        #     str(rec_dir/rec_name),
+        #     self._fourcc,
+        #     self.framerate,
+        #     self.frame_res,
+        # )
+        self._writer = (
+            ffmpeg
+            .input('pipe:', format='rawvideo', pix_fmt='rgb24', 
+                    s=f'{self.frame_res[0]}x{self.frame_res[1]}')
+            .output(str(rec_dir/rec_name),pix_fmt='rgb24')
+            .overwrite_output()
+            .run_async(pipe_stdin=True)
         )
-
 
     def update(self):
         while True:
@@ -126,7 +134,7 @@ class ImageProcessor():
             new_frame[r_min:r_max,c_min:c_max] = [0,255,0]
             
             with self._lock:
-                self._writer.write(new_frame)
+                self._writer.stdin.write(new_frame.tobytes())
                 self.frame = new_frame
                 self._updated = True
 
