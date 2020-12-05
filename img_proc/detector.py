@@ -4,7 +4,7 @@ import tflite_runtime.interpreter as tflite
 import numpy as np
 from pathlib import Path
 from datetime import datetime
-from time import time
+import time
 from threading import Thread, Lock
 
 VID_TIME = 1800
@@ -64,7 +64,7 @@ class ImageProcessor():
         self._stopped = False
 
     def start(self):
-        self._rec_start = time()
+        self._rec_start = time.time()
         self.reset_writer()
         self._vs = VideoStream(
             usePiCamera=True,
@@ -131,7 +131,7 @@ class ImageProcessor():
                 self._updated = True
 
             # Reset writer every 30 mins
-            if (time() - self._rec_start) > VID_TIME:
+            if (time.time() - self._rec_start) > VID_TIME:
                 self.reset_writer()
 
     def is_updated(self):
