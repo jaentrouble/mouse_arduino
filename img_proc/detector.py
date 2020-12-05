@@ -99,7 +99,7 @@ class ImageProcessor():
             ffmpeg
             .input('pipe:', format='rawvideo', pix_fmt='rgb24', 
                     s=f'{self.frame_res[0]}x{self.frame_res[1]}',
-                    hide_baner='', loglevel='panic')
+                    hide_banner='', loglevel='panic')
             .output(str(rec_dir/rec_name),pix_fmt='rgb24')
             .overwrite_output()
             .run_async(pipe_stdin=True)
