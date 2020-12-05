@@ -148,6 +148,7 @@ class ImageProcessor():
 
     def read(self):
         with self._lock:
+            self._updated = False
             return self.frame
 
     def stop(self):
