@@ -99,7 +99,7 @@ class ImageProcessor():
             ffmpeg
             .input('pipe:', format='rawvideo', pix_fmt='rgb24', 
                     s=f'{self.frame_res[0]}x{self.frame_res[1]}',
-                    loglevel='panic', )
+                    loglevel='panic', framerate=self.framerate)
             .output(str(rec_dir/rec_name),pix_fmt='yuv420p')
             .overwrite_output()
             .run_async(pipe_stdin=True)
