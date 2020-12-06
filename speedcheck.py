@@ -1,6 +1,7 @@
 import tflite_runtime.interpreter as tflite
 import numpy as np
 import tqdm
+import argparse
 
 parser = argparse.ArgumentParser()
 parser.add_argument('-m','--model', type=str,required=True, dest='model')
