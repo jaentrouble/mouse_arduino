@@ -11,7 +11,7 @@ class ArduProc():
     def __init__(self):
         print('initializing board...')
         self._board = Arduino(ARD_DIR)
-        self._servo = self.board.digital[2]
+        self._servo = self._board.digital[2]
         self._servo.mode = pf.SERVO
         self._rgb = [
             {
