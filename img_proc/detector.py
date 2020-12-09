@@ -6,6 +6,7 @@ import numpy as np
 from pathlib import Path
 from datetime import datetime
 import time
+from .arduino_proc import ArduProc
 from threading import Thread, Lock
 
 VID_TIME = 1800
@@ -65,6 +66,9 @@ class ImageProcessor():
         self._lock = Lock()
         self._updated = False
         self._stopped = False
+
+        self.arduino = ArduProc()
+        self.food_given = False
 
     def start(self):
         self.reset_writer()
