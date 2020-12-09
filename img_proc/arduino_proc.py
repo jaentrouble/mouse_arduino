@@ -15,14 +15,14 @@ class ArduProc():
         self._servo.mode = pf.SERVO
         self._rgb = [
             {
-                'R' : self.board.digital[5],
-                'G' : self.board.digital[3],
-                'B' : self.board.digital[4]
+                'R' : self._board.digital[5],
+                'G' : self._board.digital[3],
+                'B' : self._board.digital[4]
             },
             {
-                'R' : self.board.digital[8],
-                'G' : self.board.digital[9],
-                'B' : self.board.digital[10],
+                'R' : self._board.digital[8],
+                'G' : self._board.digital[9],
+                'B' : self._board.digital[10],
             }
         ]
         print('board initialized')
