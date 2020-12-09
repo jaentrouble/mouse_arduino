@@ -9,6 +9,8 @@ import time
 from threading import Thread, Lock
 
 VID_TIME = 1800
+AREA0 = [[0,440],[200,640]]
+AREA1 = [[290,0],[480,210]]
 
 class ImageProcessor():
     """ImageProcessor
@@ -135,7 +137,7 @@ class ImageProcessor():
             new_frame[r_min:r_max,c_min:c_max] = [0,255,0]
             
             with self._lock:
-                self._writer.stdin.write(new_frame.tobytes())
+                self._writer.stdin.write(new_frame[...,2::-1].tobytes())
                 self.frame = new_frame
                 self._updated = True
 
