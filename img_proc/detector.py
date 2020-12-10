@@ -141,11 +141,11 @@ class ImageProcessor():
 
             waiting, inside, reward = self.posproc.update_pos(pos)
             if waiting:
-                new_frame[0:20,0:20] = [255,0,0]
+                new_frame[0:20,0:20] = [0,0,255]
             if inside:
                 new_frame[0:20,20:40] = [0,255,0]
             if reward:
-                new_frame[0:20,40:60] = [0,0,255]
+                new_frame[0:20,40:60] = [255,0,0]
             
             with self._lock:    
                 self._writer.stdin.write(new_frame[...,2::-1].tobytes())
