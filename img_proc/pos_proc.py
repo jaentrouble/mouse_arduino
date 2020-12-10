@@ -42,6 +42,11 @@ class PosProc():
         Parameter
         ---------
         pos : (Row, Col)
+
+        Return
+        ------
+        Tuple of three bools:
+            (self.waiting, self.was_inside, self.reward_given)
         """
         # Do nothing if there's no reward left to give
         if self.reward_given:
@@ -54,7 +59,6 @@ class PosProc():
                 self.waiting_start = None
                 self.target_idx = None
                 self.rewarded_time = None
-            return
         else:
             now = datetime.now()
             # If it is time to test
@@ -121,5 +125,7 @@ class PosProc():
                 self.target_area = None
                 self.rewarded_time = None
 
+        return self.waiting, self.was_inside, self.reward_given
+        
     def inside(self, pos, area):
         return np.all(np.less(area[0],pos) and np.less(pos,area[1]))
