@@ -10,5 +10,5 @@ def gravity(rc, last_rc = None):
         new_delta = delta * (GRAVITY_C**2)/(dist**2)
         new_rc = (last_rc + new_delta).astype(np.int)
     else:
-        new_rc = last_rc
+        new_rc = rc
     return new_rc
