@@ -52,7 +52,7 @@ class PosProc():
         if self.reward_given:
             # If it is the first time after the reward was given
             # And at least a second has passed
-            if self.waiting and (self.rewarded_time-time.time())>1:
+            if self.waiting and (time.time()-self.rewarded_time)>1:
                 self.arduino.turn_off_all()
                 self.waiting = False
                 self.waited = False
@@ -84,7 +84,7 @@ class PosProc():
                 # If waiting (Red LED on)
                 else:
                     # If the time limit has not passed
-                    if self.waiting_start - time.time() < WAIT_TIME:
+                    if time.time() - self.waiting_start < WAIT_TIME:
                         # If the mouse is inside the target area
                         if self.inside(pos, self.target_area):
                             # If mouse is now entering the area
@@ -97,7 +97,7 @@ class PosProc():
                             else:
                                 # If the mouse stayed long enough
                                 # Drop food and turn on the Blue LED
-                                if self.inside_start - time.time() > STAY_TIME:
+                                if time.time()-self.inside_start > STAY_TIME:
                                     self.arduino.drop_food()
                                     self.reward_given = True
                                     self.arduino.turn_on(self.target_idx,'B')
