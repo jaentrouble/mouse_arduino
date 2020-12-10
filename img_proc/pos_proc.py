@@ -3,8 +3,8 @@ from datetime import datetime
 import time
 import numpy as np
 
-AREA0 = [[0,440],[200,640]]
-AREA1 = [[290,0],[480,210]]
+AREA0 = [[0,440],[200,639]]
+AREA1 = [[290,0],[479,210]]
 AREA = [
     AREA0,
     AREA1,
@@ -126,6 +126,6 @@ class PosProc():
                 self.rewarded_time = None
 
         return self.waiting, self.was_inside, self.reward_given
-        
+
     def inside(self, pos, area):
         return np.all(np.less(area[0],pos) and np.less(pos,area[1]))
