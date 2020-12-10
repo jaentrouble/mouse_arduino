@@ -128,4 +128,4 @@ class PosProc():
         return self.waiting, self.was_inside, self.reward_given
 
     def inside(self, pos, area):
-        return np.all(np.less(area[0],pos) and np.less(pos,area[1]))
+        return np.all(np.logical_and(np.less(area[0],pos),np.less(pos,area[1])))
