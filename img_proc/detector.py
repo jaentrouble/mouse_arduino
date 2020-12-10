@@ -8,6 +8,7 @@ from datetime import datetime
 import time
 from threading import Thread, Lock
 from img_proc import pos_proc as pp
+from img_proc import tools
 
 VID_TIME = 1800
 
@@ -63,6 +64,7 @@ class ImageProcessor():
 
         # Position processor
         self.posproc = pp.PosProc()
+        self._last_pos = None
 
         self._lock = Lock()
         self._updated = False
@@ -129,6 +131,8 @@ class ImageProcessor():
             pos = np.unravel_index(heatmap.flatten().argmax(),
                                    self.output_size_hw)
             pos = np.multiply(pos, self.resize_ratio).astype(np.int)
+            pos = tools.gravity(pos, self._last_pos)
+            self._last_pos = pos
             r,c = pos
             r_min = max(r-5,0)
             r_max = r+5
