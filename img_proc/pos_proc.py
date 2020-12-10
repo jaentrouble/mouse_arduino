@@ -9,7 +9,7 @@ AREA = [
     AREA0,
     AREA1,
 ]
-TARGET_HOURS = range(0,8)
+TARGET_HOURS = list(range(0,8)) + list(range(21,24))
 TARGET_MINS = range(0,60,10)
 # WAIT_TIME should not exceed 60 seconds
 WAIT_TIME = 30
