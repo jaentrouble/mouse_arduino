@@ -58,7 +58,9 @@ class PosProc():
                 self.waited = False
                 self.waiting_start = None
                 self.target_idx = None
+                self.target_area = None
                 self.rewarded_time = None
+                self.was_inside = False
         else:
             now = datetime.now()
             # If it is time to test
@@ -124,6 +126,7 @@ class PosProc():
                 self.target_idx = None
                 self.target_area = None
                 self.rewarded_time = None
+                self.was_inside = False
 
         return self.waiting, self.was_inside, self.reward_given
 
