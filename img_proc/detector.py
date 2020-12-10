@@ -6,12 +6,9 @@ import numpy as np
 from pathlib import Path
 from datetime import datetime
 import time
-from .arduino_proc import ArduProc
 from threading import Thread, Lock
 
 VID_TIME = 1800
-AREA0 = [[0,440],[200,640]]
-AREA1 = [[290,0],[480,210]]
 
 class ImageProcessor():
     """ImageProcessor
@@ -67,9 +64,6 @@ class ImageProcessor():
         self._updated = False
         self._stopped = False
 
-        self.arduino = ArduProc()
-        self.food_given = False
-
     def start(self):
         self.reset_writer()
         self._vs = VideoStream(
@@ -80,9 +74,7 @@ class ImageProcessor():
         print('initiating...')
         time.sleep(2)
 
-        t = Thread(target=self.update, args=())
-        t.daemon = True
-        t.start()
+        Thread(target=self.update, daemon=True).start()
 
         return self
 
