@@ -1,5 +1,5 @@
 import numpy as np
-GRAVITY_C = 50
+GRAVITY_C = 100
 
 def gravity(rc, last_rc = None):
     if last_rc is None:
