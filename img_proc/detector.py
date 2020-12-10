@@ -135,6 +135,9 @@ class ImageProcessor():
             c_min = max(c-5,0)
             c_max = c+5
             new_frame[r_min:r_max,c_min:c_max] = [0,255,0]
+
+            for area in pp.AREA:
+                new_frame = self.draw_area(new_frame, area, [255,255,0])
             
             with self._lock:
                 self.posproc.update_pos(pos)
@@ -145,6 +148,17 @@ class ImageProcessor():
             # Reset writer every 30 mins
             if (time.time() - self._rec_start) > VID_TIME:
                 self.reset_writer()
+
+    def draw_area(self, frame, area, color):
+        r0 = area[0][0]
+        r1 = area[1][0]
+        c0 = area[0][1]
+        c1 = area[1][1]
+        frame[r0:r1,c0] = color
+        frame[r0:r1,c1] = color
+        frame[r0,c0:c1] = color
+        frame[r1,c0:c1] = color
+        return frame
 
     def is_updated(self):
         return self._updated
