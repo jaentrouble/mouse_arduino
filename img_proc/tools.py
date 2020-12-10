@@ -3,7 +3,7 @@ GRAVITY_C = 50
 
 def gravity(rc, last_rc = None):
     if last_rc is None:
-        last_rc = np.array([r,c]])
+        last_rc = np.array([r,c])
     delta = np.subtract(rc, last_rc)
     dist = np.linalg.norm(delta)
     if dist > GRAVITY_C:
