@@ -7,6 +7,7 @@ from pathlib import Path
 from datetime import datetime
 import time
 from threading import Thread, Lock
+from img_proc import pos_proc as pp
 
 VID_TIME = 1800
 
@@ -59,6 +60,9 @@ class ImageProcessor():
 
         # Dummy frame
         self.frame = np.zeros((100,100,3),dtype=np.uint8)
+
+        # Position processor
+        self.posproc = pp.PosProc()
 
         self._lock = Lock()
         self._updated = False
@@ -133,6 +137,7 @@ class ImageProcessor():
             new_frame[r_min:r_max,c_min:c_max] = [0,255,0]
             
             with self._lock:
+                self.posproc.update_pos(pos)
                 self._writer.stdin.write(new_frame[...,2::-1].tobytes())
                 self.frame = new_frame
                 self._updated = True
