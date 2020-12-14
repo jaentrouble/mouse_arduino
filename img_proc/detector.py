@@ -138,7 +138,7 @@ class ImageProcessor():
             r_max = r+5
             c_min = max(c-5,0)
             c_max = c+5
-            new_frame[r_min:r_max,c_min:c_max] = [0,255,0]
+            new_frame[r_min:r_max,c_min:c_max] = [0,255,255]
 
             for area in pp.AREA:
                 new_frame = self.draw_area(new_frame, area, [255,255,0])
