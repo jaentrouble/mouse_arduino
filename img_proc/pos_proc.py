@@ -3,8 +3,8 @@ from datetime import datetime
 import time
 import numpy as np
 
-AREA0 = [[0,440],[200,639]]
-AREA1 = [[290,0],[479,210]]
+AREA0 = [[0,440],[220,639]]
+AREA1 = [[300,0],[479,230]]
 AREA = [
     AREA0,
     AREA1,
