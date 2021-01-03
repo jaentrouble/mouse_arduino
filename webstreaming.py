@@ -14,7 +14,7 @@ parser.add_argument('-v','--viddir', type=str,required=True, dest='vid_dir')
 args = parser.parse_args()
 
 FRAME_RES = (640,480)
-model_path = 'savedmodels/mobv3_small_07_head_q3q3_quan.tflite'
+model_path = 'savedmodels/mobv3_small_07_head_q3q4_quan.tflite'
 imgproc = ImageProcessor(FRAME_RES, args.vid_dir, model_path).start()
 
 
