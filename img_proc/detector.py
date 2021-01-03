@@ -123,7 +123,7 @@ class ImageProcessor():
             resized_frame = cv2.resize(new_frame, dsize=self.input_size_wh)
             self.interpreter.set_tensor(
                 self.input_idx,
-                resized_frame[np.newaxis,...]
+                resized_frame[np.newaxis,...].astype(np.float32)
             )
             self.interpreter.invoke()
             heatmap = np.squeeze(self.interpreter.get_tensor(
