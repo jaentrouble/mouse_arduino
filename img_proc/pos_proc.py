@@ -9,12 +9,18 @@ AREA = [
     AREA0,
     AREA1,
 ]
-# TARGET_HOURS = list(range(0,8)) + list(range(21,24))
-TARGET_HOURS = list(range(21,22))
-TARGET_MINS = range(0,60,10)
-# WAIT_TIME should not exceed 60 seconds
-WAIT_TIME = 30
-STAY_TIME = 3
+TARGET_HOURS = list(range(0,7)) + list(range(22,24))
+# TARGET_HOURS = list(range(22,22))
+TARGET_MINS = list(range(0,60,30))
+
+WAIT_TIME = 90
+STAY_TIME = 10
+# Extra target_mins if waiting time is over a minute
+tmp_target_min = TARGET_MINS.copy()
+for extra_wait in range(WAIT_TIME//60):
+    for m in tmp_target_min:
+        TARGET_MINS.append(m+extra_wait+1)
+
 
 class PosProc():
     """PosProc
@@ -114,11 +120,12 @@ class PosProc():
                     # but still in target hour/min
                     else:
                         self.waiting = False
+                        self.was_inside = False
                         self.arduino.turn_off_all()
 
             # If it is not testing time
             else:
-                # Just in case waiting time exceeds 1 minutes
+                # Just in case waiting time passes target time
                 if self.waiting:
                     self.arduino.turn_off_all()
                 self.waiting = False
