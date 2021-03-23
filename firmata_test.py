@@ -1,12 +1,12 @@
 import pyfirmata
 import time
 
-board = pyfirmata.Arduino('COM3')
-servo = board.digital[7]
-servo.mode = pyfirmata.SERVO
+board = pyfirmata.ArduinoMega('COM4')
+d = board.digital[32]
+d.mode = pyfirmata.OUTPUT
 
 for _ in range(10):
-    servo.write(100)
-    time.sleep(2)
-    servo.write(20)
-    time.sleep(2)
+    d.write(1)
+    time.sleep(0.5)
+    d.write(0)
+    time.sleep(0.5)
