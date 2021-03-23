@@ -1,12 +1,22 @@
 import pyfirmata
+from pyfirmata import util
 import time
 
 board = pyfirmata.ArduinoMega('COM4')
-d = board.digital[32]
-d.mode = pyfirmata.OUTPUT
+util.Iterator(board).start()
+led = board.digital[22]
+led.mode = pyfirmata.OUTPUT
 
-for _ in range(10):
-    d.write(1)
-    time.sleep(0.5)
-    d.write(0)
-    time.sleep(0.5)
+button = board.digital[34]
+button.mode = pyfirmata.INPUT
+
+sol = board.digital[40]
+sol.mode = pyfirmata.OUTPUT
+
+while True:
+    if button.read():
+        led.write(1)
+        sol.write(1)
+    else:
+        led.write(0)
+        sol.write(0)
