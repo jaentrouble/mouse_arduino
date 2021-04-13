@@ -31,7 +31,7 @@ def generator():
     global _vs
     while True:
         new_frame = _vs.read().copy()
-        flag, encoded_image = cv2.imencode('.jpg',frame)
+        flag, encoded_image = cv2.imencode('.jpg',new_frame)
         
         yield (b'--frame\r\n'
                b'Content-Type: image/jpeg\r\n\r\n'+
