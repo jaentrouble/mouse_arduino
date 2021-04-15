@@ -27,70 +27,73 @@ class ArduProc():
         for b in self._buttons:
             b.mode = pf.INPUT
 
-        #TODO: check buttons number
-        self._room1 = {
-            'corridor_leds' : [
-                self._leds[14],
-                self._leds[9],
-            ],
-            'button_leds' : [
-                self._leds[1],
-                self._leds[2],
-            ],
-            'buttons' : [
-                self._buttons[2],
-                self._buttons[1],
-            ],
-            'valve' : self._valves[4]
-        }
+        self._rooms = [
+            # Room 0
+            {
+                'corridor_leds' : [
+                    self._leds[13],
+                    self._leds[8],
+                ],
+                'button_leds' : [
+                    self._leds[0],
+                    self._leds[1],
+                ],
+                'buttons' : [
+                    self._buttons[1],
+                    self._buttons[0],
+                ],
+                'valve' : self._valves[3]
+            },
+            # Room 1
+            {
+                'corridor_leds' : [
+                    self._leds[15],
+                    self._leds[10],
+                ],
+                'button_leds' : [
+                    self._leds[2],
+                    self._leds[3],
+                ],
+                'buttons' : [
+                    self._buttons[7],
+                    self._buttons[6],
+                ],
+                'valve' : self._valves[0]
+            },
+            # Room 2
+            {
+                'corridor_leds' : [
+                    self._leds[9],
+                    self._leds[12],
+                ],
+                'button_leds' : [
+                    self._leds[4],
+                    self._leds[5],
+                ],
+                'buttons' : [
+                    self._buttons[5],
+                    self._buttons[4],
+                ],
+                'valve' : self._valves[1]
+            },
+            # Room 3
+            {
+                'corridor_leds' : [
+                    self._leds[11],
+                    self._leds[14],
+                ],
+                'button_leds' : [
+                    self._leds[6],
+                    self._leds[7],
+                ],
+                'buttons' : [
+                    self._buttons[3],
+                    self._buttons[2],
+                ],
+                'valve' : self._valves[2]
+            },
+        ]
 
-        self._room2 = {
-            'corridor_leds' : [
-                self._leds[16],
-                self._leds[11],
-            ],
-            'button_leds' : [
-                self._leds[3],
-                self._leds[4],
-            ],
-            'buttons' : [
-                self._buttons[8],
-                self._buttons[7],
-            ],
-            'valve' : self._valves[1]
-        }
-
-        self._room3 = {
-            'corridor_leds' : [
-                self._leds[10],
-                self._leds[13],
-            ],
-            'button_leds' : [
-                self._leds[5],
-                self._leds[6],
-            ],
-            'buttons' : [
-                self._buttons[6],
-                self._buttons[5],
-            ],
-            'valve' : self._valves[2]
-        }
-
-        self._room4 = {
-            'corridor_leds' : [
-                self._leds[12],
-                self._leds[15],
-            ],
-            'button_leds' : [
-                self._leds[7],
-                self._leds[8],
-            ],
-            'buttons' : [
-                self._buttons[4],
-                self._buttons[3],
-            ],
-            'valve' : self._valves[4]
-        }
 
         print('board initialized')
         self._lock = Lock()
@@ -103,6 +106,16 @@ class ArduProc():
         with self._lock:
             for l in self._leds:
                 l.write(0)
+
+    def update(self):
+        """update
+        This function is called every loop
+        """
+        for room in self._rooms:
+            
+
+
+        pass
 
     def turn_on_timer(self, set_num, color, sleep_time=1):
         """turn_on_timer
