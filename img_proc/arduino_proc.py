@@ -38,8 +38,8 @@ class ArduProc():
                 self._leds[2],
             ],
             'buttons' : [
-                self._buttons[],
-                self._buttons[],
+                self._buttons[2],
+                self._buttons[1],
             ],
             'valve' : self._valves[4]
         }
@@ -54,8 +54,8 @@ class ArduProc():
                 self._leds[4],
             ],
             'buttons' : [
-                self._buttons[],
-                self._buttons[],
+                self._buttons[8],
+                self._buttons[7],
             ],
             'valve' : self._valves[1]
         }
@@ -70,8 +70,8 @@ class ArduProc():
                 self._leds[6],
             ],
             'buttons' : [
-                self._buttons[],
-                self._buttons[],
+                self._buttons[6],
+                self._buttons[5],
             ],
             'valve' : self._valves[2]
         }
@@ -86,8 +86,8 @@ class ArduProc():
                 self._leds[8],
             ],
             'buttons' : [
-                self._buttons[],
-                self._buttons[],
+                self._buttons[4],
+                self._buttons[3],
             ],
             'valve' : self._valves[4]
         }
