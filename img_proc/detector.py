@@ -19,7 +19,7 @@ class ImageProcessor():
     It also saves processed frames into a video file.
     Use read() to get a frame which has a head pointer drawn on.
     """
-    def __init__(self, frame_resolution, vid_dir, model_path, framerate=10):
+    def __init__(self, frame_resolution, vid_dir, model_path, framerate=10, record_tracking=True):
         """
         Parameters
         ----------
@@ -34,6 +34,8 @@ class ImageProcessor():
         framerate : int
             imutils.video.VideoStream option
         """
+        self._record_tracking = record_tracking
+
         self.vid_dir = Path(vid_dir)
         self.framerate = framerate
         self.frame_res = frame_resolution
@@ -120,6 +122,7 @@ class ImageProcessor():
                 return
 
             new_frame = self._vs.read().copy()
+            new_frame_original = new_frame.copy()
             resized_frame = cv2.resize(new_frame, dsize=self.input_size_wh)
             self.interpreter.set_tensor(
                 self.input_idx,
@@ -152,8 +155,12 @@ class ImageProcessor():
             if reward:
                 new_frame[0:20,40:60] = [255,0,0]
             
-            with self._lock:    
-                self._writer.stdin.write(new_frame[...,2::-1].tobytes())
+            with self._lock:
+                if self._record_tracking:
+                    record_frame = new_frame
+                else:
+                    record_frame = new_frame_original
+                self._writer.stdin.write(record_frame[...,2::-1].tobytes())
                 self.frame = new_frame
                 self._updated = True
 
