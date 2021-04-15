@@ -1,5 +1,6 @@
 import pyfirmata as pf
-from pyfirmata import Arduino
+from pyfirmata import util
+from pyfirmata import ArduinoMega
 import time
 from threading import Thread, Lock
 
@@ -11,37 +12,97 @@ class ArduProc():
     """
     def __init__(self):
         print('initializing board...')
-        self._board = Arduino(ARD_DIR)
-        self._servo = self._board.digital[2]
-        self._servo.mode = pf.SERVO
-        self._rgb = [
-            {
-                'R' : self._board.digital[8],
-                'G' : self._board.digital[9],
-                'B' : self._board.digital[10],
-            },
-            {
-                'R' : self._board.digital[5],
-                'G' : self._board.digital[3],
-                'B' : self._board.digital[4]
-            },
+        self._board = ArduinoMega(ARD_DIR)
+        util.Iterator(self._board).start()
+        self._leds = [
+            self._board.digital[i] for i in range(22,54,2)
         ]
+        self._valves = [
+            self._board.digital[i] for i in range(47,55,2)
+        ]
+
+        self._buttons = [
+            self._board.digital[i] for i in range(23,39,2)
+        ]
+        for b in self._buttons:
+            b.mode = pf.INPUT
+
+        #TODO: check buttons number
+        self._room1 = {
+            'corridor_leds' : [
+                self._leds[14],
+                self._leds[9],
+            ],
+            'button_leds' : [
+                self._leds[1],
+                self._leds[2],
+            ],
+            'buttons' : [
+                self._buttons[],
+                self._buttons[],
+            ],
+            'valve' : self._valves[4]
+        }
+
+        self._room2 = {
+            'corridor_leds' : [
+                self._leds[16],
+                self._leds[11],
+            ],
+            'button_leds' : [
+                self._leds[3],
+                self._leds[4],
+            ],
+            'buttons' : [
+                self._buttons[],
+                self._buttons[],
+            ],
+            'valve' : self._valves[1]
+        }
+
+        self._room3 = {
+            'corridor_leds' : [
+                self._leds[10],
+                self._leds[13],
+            ],
+            'button_leds' : [
+                self._leds[5],
+                self._leds[6],
+            ],
+            'buttons' : [
+                self._buttons[],
+                self._buttons[],
+            ],
+            'valve' : self._valves[2]
+        }
+
+        self._room4 = {
+            'corridor_leds' : [
+                self._leds[12],
+                self._leds[15],
+            ],
+            'button_leds' : [
+                self._leds[7],
+                self._leds[8],
+            ],
+            'buttons' : [
+                self._buttons[],
+                self._buttons[],
+            ],
+            'valve' : self._valves[4]
+        }
+
         print('board initialized')
         self._lock = Lock()
 
-    def turn_on(self, set_num, color):
-        """turn_on
-        Turn on specified LED
-        
-        Parameter
-        ---------
-        set_num : int
-        
-        color : str
-            One of 'R','G','B'
+    def led_all_off(self):
+        """led_all_off
+        Turn off all LEDs
+
         """
         with self._lock:
-            self._rgb[set_num][color].write(1)
+            for l in self._leds:
+                l.write(0)
 
     def turn_on_timer(self, set_num, color, sleep_time=1):
         """turn_on_timer
@@ -83,14 +144,6 @@ class ArduProc():
         with self._lock:
             self._rgb[set_num][color].write(0)
 
-    def turn_off_all(self):
-        """turn_off_all
-        Turn off every LEDs
-        """
-        with self._lock:
-            for pinset in self._rgb:
-                for color, pin in pinset.items():
-                    pin.write(0)
         
     def drop_food(self):
         """drop_food
