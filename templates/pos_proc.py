@@ -43,17 +43,9 @@ class PosProc():
         self._center0 = np.mean(AREA0,axis=0)
         self._center1 = np.mean(AREA1,axis=0)
 
+    # TODO: Game rules
     def update_pos(self, pos):
         """update_pos
-        
-        Parameter
-        ---------
-        pos : (Row, Col)
-
-        Return
-        ------
-        Tuple of three bools:
-            (self.waiting, self.was_inside, self.reward_given)
         """
         # Do nothing if there's no reward left to give
         if self.reward_given:

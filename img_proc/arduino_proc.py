@@ -118,6 +118,7 @@ class ArduProc():
     
     def loop(self):
         Thread(target=self._loop_thread, daemon=True).start()
+        return self
 
     def _loop_thread(self):
         while True:

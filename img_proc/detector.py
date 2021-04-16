@@ -7,7 +7,7 @@ from pathlib import Path
 from datetime import datetime
 import time
 from threading import Thread, Lock
-from img_proc import pos_proc as pp
+from img_proc import arduino_proc as ap
 from img_proc import tools
 
 VID_TIME = 1800
@@ -19,7 +19,14 @@ class ImageProcessor():
     It also saves processed frames into a video file.
     Use read() to get a frame which has a head pointer drawn on.
     """
-    def __init__(self, frame_resolution, vid_dir, model_path, framerate=10, record_tracking=True):
+    def __init__(
+            self,
+            frame_resolution,
+            vid_dir,
+            model_path,
+            framerate=10,
+            record_tracking=True
+        ):
         """
         Parameters
         ----------
@@ -58,14 +65,13 @@ class ImageProcessor():
         self.output_size_hw = (self.output_size_wh[1], self.output_size_wh[0])
         self.resize_ratio = np.divide(self.frame_res_hw, self.output_size_hw)
 
-        # self._fourcc = cv2.VideoWriter_fourcc(*'MPEG')
         self._writer = None
 
         # Dummy frame
         self.frame = np.zeros((100,100,3),dtype=np.uint8)
 
         # Position processor
-        self.posproc = pp.PosProc()
+        self.arduproc = ap.ArduProc().loop()
         self._last_pos = None
 
         self._lock = Lock()
@@ -95,12 +101,6 @@ class ImageProcessor():
         if not rec_dir.exists():
             rec_dir.mkdir(parents=True)
         rec_name = now.strftime('%m_%d_%H_%M.ts')
-        # self._writer = cv2.VideoWriter(
-        #     str(rec_dir/rec_name),
-        #     self._fourcc,
-        #     self.framerate,
-        #     self.frame_res,
-        # )
         self._writer = (
             ffmpeg
             .input('pipe:', format='rawvideo', pix_fmt='rgb24', 
@@ -144,16 +144,8 @@ class ImageProcessor():
             c_max = c+5
             new_frame[r_min:r_max,c_min:c_max] = [0,255,255]
 
-            for area in pp.AREA:
-                new_frame = self.draw_area(new_frame, area, [255,255,0])
-
-            waiting, inside, reward = self.posproc.update_pos(pos)
-            if waiting:
-                new_frame[0:20,0:20] = [0,0,255]
-            if inside:
-                new_frame[0:20,20:40] = [0,255,0]
-            if reward:
-                new_frame[0:20,40:60] = [255,0,0]
+            # for area in pp.AREA:
+            #     new_frame = self.draw_area(new_frame, area, [255,255,0])
             
             with self._lock:
                 if self._record_tracking:
