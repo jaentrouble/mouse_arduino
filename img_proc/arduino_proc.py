@@ -108,6 +108,8 @@ class ArduProc():
         self._last_jackpot = 0
         self._jackpot_delay = 600
 
+        self.led_all_off()
+
     def led_all_off(self):
         """led_all_off
         Turn off all LEDs
