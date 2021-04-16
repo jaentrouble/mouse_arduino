@@ -4,6 +4,7 @@ from pyfirmata import ArduinoMega
 import time
 from threading import Thread, Lock
 import random
+import datetime
 
 ARD_DIR = '/dev/ttyACM0'
 
@@ -137,6 +138,9 @@ class ArduProc():
                 else:
                     self.turn_off(bl)
             if button_pressed:
+                if room['valve_avail']:
+                    now = datetime.datetime.now()
+                    print('button pressed'+now.strftime('%m%d%H%M%S'))
                 if (room['valve_avail'] and 
                     random.random() < self._jackpot_prob and
                     time.time() - self._last_jackpot > self._jackpot_delay):
