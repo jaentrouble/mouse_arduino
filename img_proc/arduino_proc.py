@@ -129,7 +129,7 @@ class ArduProc():
         """update
         This function is called every loop
         """
-        for room in self._rooms:
+        for i, room in enumerate(self._rooms):
             button_pressed = False
             for b, bl in zip(room['buttons'], room['button_leds']):
                 if b.read():
@@ -137,10 +137,10 @@ class ArduProc():
                     button_pressed = True
                 else:
                     self.turn_off(bl)
-            if button_pressed:
+            if button_pressed and i != 2:
                 if room['valve_avail']:
                     now = datetime.datetime.now()
-                    print('button pressed'+now.strftime('%m%d%H%M%S'))
+                    print(f'room{i} button pressed'+now.strftime('%m%d%H%M%S'))
                 if (room['valve_avail'] and 
                     random.random() < self._jackpot_prob and
                     time.time() - self._last_jackpot > self._jackpot_delay):
