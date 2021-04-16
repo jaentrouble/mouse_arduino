@@ -45,5 +45,3 @@ def video_feed():
 
 
 app.run(host=args.ip, port=args.port, debug=True, threaded=True, use_reloader=False)
-
-imgproc.stop()
