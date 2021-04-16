@@ -100,6 +100,7 @@ class ArduProc():
             },
         ]
 
+        time.sleep(2)
 
         print('board initialized')
 
