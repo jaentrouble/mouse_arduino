@@ -116,9 +116,8 @@ class ArduProc():
         Turn off all LEDs
 
         """
-        with self._lock:
-            for l in self._leds:
-                l.write(0)
+        for l in self._leds:
+            self.turn_off(l)
     
     def loop(self):
         Thread(target=self._loop_thread, daemon=True).start()
@@ -135,7 +134,7 @@ class ArduProc():
         for i, room in enumerate(self._rooms):
             button_pressed = False
             for b, bl in zip(room['buttons'], room['button_leds']):
-                if b.read():
+                if b.read() and i != 2:
                     self.turn_on(bl)
                     button_pressed = True
                 else:
