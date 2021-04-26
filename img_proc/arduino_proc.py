@@ -7,6 +7,14 @@ import random
 import datetime
 
 ARD_DIR = '/dev/ttyACM0'
+JACKPOT_PROB = 0.05
+JACKPOT_COOLTIME = 3600
+JACKPOT_BURSTS = 20
+NORMAL_BURSTS = 3
+NORMAL_COOLTIME = 600
+
+BURST_INTERVAL = 0.2
+BURST_DURATION = 0.05
 
 class ArduProc():
     """ArduProc
@@ -105,7 +113,7 @@ class ArduProc():
         print('board initialized')
 
         self._lock = Lock()
-        self._jackpot_prob = 0.05
+        self._jackpot_prob = JACKPOT_PROB
         self._last_jackpot = 0
         self._jackpot_delay = 600
 
@@ -148,20 +156,24 @@ class ArduProc():
                     time.time() - self._last_jackpot > self._jackpot_delay):
                     self.jackpot(room)
                 else:
-                    self.valve_timer(room, 0.05)
+                    self.valve_timer(room, BURST_DURATION, BURST_INTERVAL,
+                                     NORMAL_COOLTIME, NORMAL_BURSTS)
     
     def jackpot(self, room):
         """jackpot
         Things to do when jackpot happens
         """
+        self._last_jackpot = time.time()
         for cl in room['corridor_leds']:
             self.turn_on_timer(cl, 0.5)
-        self.valve_timer(room, 0.5, 10)
+        self.valve_timer(room, BURST_DURATION, BURST_INTERVAL,
+                         JACKPOT_COOLTIME, JACKPOT_BURSTS)
 
 
-    def valve_timer(self, room, open_time=0.05, cool_time=0.2):
+    def valve_timer(self, room, open_time:float, interval_time:float,
+                    cool_time:float, count:int):
         """valve_shot
-        Open valve for a short time
+        Open valve for a short time, count times
         While the valve is open, or is in cool time,
         additional method calls will be ignored
 
@@ -170,23 +182,35 @@ class ArduProc():
         room : Dict
             room dictionary
 
-        open_time : the time the valve be stayed open, in seconds
+        open_time : float
+            the time the valve be stayed open, in seconds
 
-        cool_time : the time the valve stays closed after open_time
+        interval_time : float
+            the time between each burst (if count > 1)
+
+        cool_time : float
+            the time the valve stays closed after open_time
+
+        count : int
+            number of bursts
         """
         if room['valve_avail']:
             Thread(
                 target=self._valve_timer_thread,
-                args=(room, open_time, cool_time),
+                args=(room, open_time, interval_time, cool_time, count),
                 daemon=True,
             ).start()
 
 
-    def _valve_timer_thread(self, room, open_time, cool_time):
+    def _valve_timer_thread(self, room, open_time, interval_time,
+                             cool_time, count):
         room['valve_avail'] = False
-        self.turn_on(room['valve'])
-        time.sleep(open_time)
-        self.turn_off(room['valve'])
+        for c in range(count):
+            self.turn_on(room['valve'])
+            time.sleep(open_time)
+            self.turn_off(room['valve'])
+            if c < count-1:
+                time.sleep(interval_time)
         time.sleep(cool_time)
         room['valve_avail'] = True
 
