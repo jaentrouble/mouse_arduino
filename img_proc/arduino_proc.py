@@ -134,8 +134,7 @@ class ArduProc():
         for i, room in enumerate(self._rooms):
             button_pressed = False
             for b, bl in zip(room['buttons'], room['button_leds']):
-                if ((b.read() and (i in [1,2])) or
-                     ((not b.read()) and (i in [0,3]))):
+                if not b.read():
                     self.turn_on(bl)
                     button_pressed = True
                 else:
