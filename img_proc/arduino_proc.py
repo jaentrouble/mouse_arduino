@@ -8,21 +8,27 @@ import datetime
 
 ARD_DIR = '/dev/ttyACM0'
 JACKPOT_PROB = 0.05
-JACKPOT_COOLTIME = 3600
+JACKPOT_COOLTIME = 0
 JACKPOT_BURSTS = 20
 NORMAL_BURSTS = 3
-NORMAL_COOLTIME = 600
+NORMAL_COOLTIME = 0
 
 BURST_INTERVAL = 0.2
 BURST_DURATION = 0.05
+
+TARGET_HOURS = list(range(0,7)) + list(range(22,24))
+TARGET_MINS = list(range(0,60,20))
+TEST_TIME = 120
 
 class ArduProc():
     """ArduProc
     Wrapper around Arduino
     """
-    def __init__(self):
+    def __init__(self, frame_res=(640,480)):
         print('initializing board...')
         self._board = ArduinoMega(ARD_DIR)
+        self._pos = (0,0)
+        self._frame_res = frame_res
         util.Iterator(self._board).start()
         self._leds = [
             self._board.digital[i] for i in range(22,54,2)
@@ -114,8 +120,12 @@ class ArduProc():
 
         self._lock = Lock()
         self._jackpot_prob = JACKPOT_PROB
-        self._last_jackpot = 0
         self._jackpot_delay = 600
+        self._waiting = False
+        # Just in case test finishes within 1 min
+        self._test_finished=False
+        self._last_test = 0
+        self._target_rooms = []
 
         self.led_all_off()
 
@@ -139,25 +149,64 @@ class ArduProc():
         """update
         This function is called every loop
         """
-        for i, room in enumerate(self._rooms):
-            button_pressed = False
-            for b, bl in zip(room['buttons'], room['button_leds']):
-                if not b.read():
-                    self.turn_on(bl)
-                    button_pressed = True
+        now = datetime.datetime.now()
+        y, x = self._pos
+        if x>self._frame_res[0]/2 and y>self._frame_res[1]/2:
+            cur_room = 1
+        elif x<=self._frame_res[0]/2 and y>self._frame_res[1]/2:
+            cur_room = 0
+        elif x>self._frame_res[0]/2 and y<=self._frame_res[1]/2:
+            cur_room = 2
+        elif x<=self._frame_res[0]/2 and y<=self._frame_res[1]/2:
+            cur_room = 3
+
+
+        if (now.hour in TARGET_HOURS) and (now.minute in TARGET_MINS) \
+            and not self._test_finished:
+            if not self._waiting:
+                self.led_all_off()
+                self._waiting = True
+                self._last_test = time.time()
+                self._target_rooms = []
+                clock_wise = random.random()<0.5
+                if clock_wise:
+                    # Target room, target button
+                    self._target_rooms.append(
+                        (self._rooms[(cur_room-2)%4], random.randint(0,1)))
+                    self._target_rooms.append(
+                        (self._rooms[(cur_room-1)%4], random.randint(0,1)))
+                    self.turn_on(self._target_rooms[1][0]['corridor_leds'][0])
+                    self.turn_on(self._rooms[cur_room]['corridor_leds'][0])
                 else:
-                    self.turn_off(bl)
-            if button_pressed:
-                if room['valve_avail']:
-                    now = datetime.datetime.now()
-                    print(f'room{i} button pressed'+now.strftime('%m%d%H%M%S'))
-                if (room['valve_avail'] and 
-                    random.random() < self._jackpot_prob and
-                    time.time() - self._last_jackpot > self._jackpot_delay):
-                    self.jackpot(room)
+                    self._target_rooms.append(
+                        (self._rooms[(cur_room+2)%4], random.randint(0,1)))
+                    self._target_rooms.append(
+                        (self._rooms[(cur_room+1)%4], random.randint(0,1)))
+                    self.turn_on(self._target_rooms[1][0]['corridor_leds'][1])
+                    self.turn_on(self._rooms[cur_room]['corridor_leds'][1])
+                for tr, tb in self._target_rooms:
+                    self.turn_on(tr['button_leds'][tb])
+                    
+        if self._waiting:
+            target_room = self._target_rooms[-1][0]
+            target_idx = self._target_rooms[-1][1]
+            target_button = target_room['buttons'][target_idx]
+            if not target_button.read():
+                self._target_rooms.pop()
+                if len(self._target_rooms)>0:
+                    self.turn_off(target_room['button_leds'][target_idx])
+                    self.normal_reward(target_room)
                 else:
-                    self.valve_timer(room, BURST_DURATION, BURST_INTERVAL,
-                                     NORMAL_COOLTIME, NORMAL_BURSTS)
+                    self.led_all_off()
+                    self.jackpot()
+                    self._waiting = False
+                    self._test_finished = True
+        if time.time()- self._last_test>TEST_TIME:
+            self._waiting = False
+            self._test_finished = False
+
+    def update_pos(self, pos):
+        self._pos = pos
     
     def jackpot(self, room):
         """jackpot
@@ -168,6 +217,10 @@ class ArduProc():
             self.turn_on_timer(cl, 0.5)
         self.valve_timer(room, BURST_DURATION, BURST_INTERVAL,
                          JACKPOT_COOLTIME, JACKPOT_BURSTS)
+
+    def normal_reward(self,room):
+        self.valve_timer(room, BURST_DURATION, BURST_INTERVAL,
+                         NORMAL_COOLTIME,NORMAL_BURSTS)
 
 
     def valve_timer(self, room, open_time:float, interval_time:float,

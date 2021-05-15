@@ -71,7 +71,7 @@ class ImageProcessor():
         self.frame = np.zeros((100,100,3),dtype=np.uint8)
 
         # Position processor
-        self.arduproc = ap.ArduProc().loop()
+        self.arduproc = ap.ArduProc(frame_resolution).loop()
         self._last_pos = None
 
         self._lock = Lock()
@@ -143,6 +143,8 @@ class ImageProcessor():
             c_min = max(c-5,0)
             c_max = c+5
             new_frame[r_min:r_max,c_min:c_max] = [0,255,255]
+
+            self.arduproc.update_pos(pos)
 
             # for area in pp.AREA:
             #     new_frame = self.draw_area(new_frame, area, [255,255,0])
