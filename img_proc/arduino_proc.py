@@ -19,6 +19,7 @@ BURST_DURATION = 0.05
 TARGET_HOURS = list(range(0,7)) + list(range(22,24))
 TARGET_MINS = list(range(0,60,20))
 TEST_TIME = 120
+INTER_BUTTON = 5
 
 class ArduProc():
     """ArduProc
@@ -126,6 +127,7 @@ class ArduProc():
         # Just in case test finishes within 1 min
         self._test_finished=False
         self._last_test = 0
+        self._last_button = 0
         self._target_rooms = []
 
         self.led_all_off()
@@ -193,7 +195,9 @@ class ArduProc():
             target_room = self._target_rooms[-1][0]
             target_idx = self._target_rooms[-1][1]
             target_button = target_room['buttons'][target_idx]
-            if not target_button.read():
+            if not target_button.read() and \
+                time.time()-self._last_button>INTER_BUTTON:
+                self._last_button = time.time()
                 self._target_rooms.pop()
                 if len(self._target_rooms)>0:
                     self.turn_off(target_room['button_leds'][target_idx])
