@@ -209,6 +209,7 @@ class ArduProc():
                     self._test_finished = True
         if time.time()- self._last_test>TEST_TIME:
             self._waiting = False
+            self.led_all_off()
             self._test_finished = False
 
     def update_pos(self, pos):
