@@ -204,7 +204,7 @@ class ArduProc():
                     self.normal_reward(target_room)
                 else:
                     self.led_all_off()
-                    self.jackpot()
+                    self.jackpot(target_room)
                     self._waiting = False
                     self._test_finished = True
         if time.time()- self._last_test>TEST_TIME:
