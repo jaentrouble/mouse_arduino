@@ -19,7 +19,7 @@ BURST_DURATION = 0.05
 TARGET_HOURS = list(range(0,7)) + list(range(22,24))
 TARGET_MINS = list(range(0,60,20))
 TEST_TIME = 120
-INTER_BUTTON = 5
+INTER_BUTTON = 3
 
 class ArduProc():
     """ArduProc
