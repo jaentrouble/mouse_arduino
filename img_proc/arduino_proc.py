@@ -119,6 +119,7 @@ class ArduProc():
         print('board initialized')
 
         self._lock = Lock()
+        self._pos_lock = Lock()
         self._jackpot_prob = JACKPOT_PROB
         self._jackpot_delay = 600
         self._waiting = False
@@ -150,7 +151,8 @@ class ArduProc():
         This function is called every loop
         """
         now = datetime.datetime.now()
-        y, x = self._pos
+        with self._pos_lock:
+            y, x = self._pos
         if x>self._frame_res[0]/2 and y>self._frame_res[1]/2:
             cur_room = 1
         elif x<=self._frame_res[0]/2 and y>self._frame_res[1]/2:
@@ -186,7 +188,7 @@ class ArduProc():
                     self.turn_on(self._rooms[cur_room]['corridor_leds'][1])
                 for tr, tb in self._target_rooms:
                     self.turn_on(tr['button_leds'][tb])
-                    
+
         if self._waiting:
             target_room = self._target_rooms[-1][0]
             target_idx = self._target_rooms[-1][1]
@@ -206,7 +208,8 @@ class ArduProc():
             self._test_finished = False
 
     def update_pos(self, pos):
-        self._pos = pos
+        with self._pos_lock:
+            self._pos = pos
     
     def jackpot(self, room):
         """jackpot
