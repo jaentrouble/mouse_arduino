@@ -25,11 +25,12 @@ class ArduProc():
     """ArduProc
     Wrapper around Arduino
     """
-    def __init__(self, frame_res=(640,480)):
+    def __init__(self, frame_res=(640,480), passive_mode=False):
         print('initializing board...')
         self._board = ArduinoMega(ARD_DIR)
         self._pos = (0,0)
         self._frame_res = frame_res
+        self._passive_mode = passive_mode
         util.Iterator(self._board).start()
         self._leds = [
             self._board.digital[i] for i in range(22,54,2)
