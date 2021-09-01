@@ -21,6 +21,8 @@ TARGET_MINS = list(range(0,60,20))
 TEST_TIME = 120
 INTER_BUTTON = 3
 
+# TODO : change position update method
+
 class ArduProc():
     """ArduProc
     Wrapper around Arduino
@@ -28,7 +30,6 @@ class ArduProc():
     def __init__(self, frame_res=(640,480), passive_mode=False):
         print('initializing board...')
         self._board = ArduinoMega(ARD_DIR)
-        self._pos = (0,0)
         self._frame_res = frame_res
         self._passive_mode = passive_mode
         util.Iterator(self._board).start()

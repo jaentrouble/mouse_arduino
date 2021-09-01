@@ -10,6 +10,8 @@ from threading import Thread, Lock
 from img_proc import arduino_proc as ap
 from img_proc import tools
 
+# TODO : add 'get pos' method
+
 VID_TIME = 1800
 
 class ImageProcessor():
@@ -25,7 +27,6 @@ class ImageProcessor():
             vid_dir,
             model_path,
             framerate=10,
-            record_tracking=True
         ):
         """
         Parameters
@@ -122,39 +123,28 @@ class ImageProcessor():
                 return
 
             new_frame = self._vs.read().copy()
-            new_frame_original = new_frame.copy()
-            resized_frame = cv2.resize(new_frame, dsize=self.input_size_wh)
-            self.interpreter.set_tensor(
-                self.input_idx,
-                resized_frame[np.newaxis,...].astype(np.float32)
-            )
-            self.interpreter.invoke()
-            heatmap = np.squeeze(self.interpreter.get_tensor(
-                self.output_idx
-            ))
-            pos = np.unravel_index(heatmap.flatten().argmax(),
-                                   self.output_size_hw)
-            pos = np.multiply(pos, self.resize_ratio).astype(np.int)
-            pos = tools.gravity(pos, self._last_pos)
-            self._last_pos = pos
-            r,c = pos
-            r_min = max(r-5,0)
-            r_max = r+5
-            c_min = max(c-5,0)
-            c_max = c+5
-            new_frame[r_min:r_max,c_min:c_max] = [0,255,255]
 
-            self.arduproc.update_pos(pos)
+            # resized_frame = cv2.resize(new_frame, dsize=self.input_size_wh)
+            # self.interpreter.set_tensor(
+            #     self.input_idx,
+            #     resized_frame[np.newaxis,...].astype(np.float32)
+            # )
+            # self.interpreter.invoke()
+            # heatmap = np.squeeze(self.interpreter.get_tensor(
+            #     self.output_idx
+            # ))
+            # pos = np.unravel_index(heatmap.flatten().argmax(),
+            #                        self.output_size_hw)
+            # pos = np.multiply(pos, self.resize_ratio).astype(np.int)
+            # pos = tools.gravity(pos, self._last_pos)
+            # self._last_pos = pos
+            # self.arduproc.update_pos(pos)
 
             # for area in pp.AREA:
             #     new_frame = self.draw_area(new_frame, area, [255,255,0])
             
             with self._lock:
-                if self._record_tracking:
-                    record_frame = new_frame
-                else:
-                    record_frame = new_frame_original
-                self._writer.stdin.write(record_frame[...,2::-1].tobytes())
+                self._writer.stdin.write(new_frame[...,2::-1].tobytes())
                 self.frame = new_frame
                 self._updated = True
 
