@@ -6,6 +6,9 @@ from threading import Thread, Lock
 import random
 import datetime
 
+#TODO: erase
+from .detector import ImageProcessor
+
 ARD_DIR = '/dev/ttyACM0'
 JACKPOT_PROB = 0.05
 JACKPOT_COOLTIME = 0
@@ -27,7 +30,8 @@ class ArduProc():
     """ArduProc
     Wrapper around Arduino
     """
-    def __init__(self, frame_res=(640,480), passive_mode=False):
+    def __init__(self, detector:ImageProcessor, frame_res=(640,480), passive_mode=False):
+        self._detector = detector
         print('initializing board...')
         self._board = ArduinoMega(ARD_DIR)
         self._frame_res = frame_res

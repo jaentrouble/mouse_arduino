@@ -10,7 +10,7 @@ from threading import Thread, Lock
 from img_proc import arduino_proc as ap
 from img_proc import tools
 
-# TODO : add 'get pos' method
+# TODO: change reset method (add reseting frame count)
 
 VID_TIME = 1800
 
@@ -19,7 +19,7 @@ class ImageProcessor():
     Constantly grabs frames from picamera and do some things with them
     It uses a thread to process frames in the background.
     It also saves processed frames into a video file.
-    Use read() to get a frame which has a head pointer drawn on.
+    Use read() to get current frame.
     """
     def __init__(
             self,
@@ -42,9 +42,9 @@ class ImageProcessor():
         framerate : int
             imutils.video.VideoStream option
         """
-        self._record_tracking = record_tracking
 
         self.vid_dir = Path(vid_dir)
+        self.frame_count = 0
         self.framerate = framerate
         self.frame_res = frame_resolution
         self.frame_res_hw = (self.frame_res[1],self.frame_res[0])
@@ -66,14 +66,14 @@ class ImageProcessor():
         self.output_size_hw = (self.output_size_wh[1], self.output_size_wh[0])
         self.resize_ratio = np.divide(self.frame_res_hw, self.output_size_hw)
 
-        self._writer = None
+        self._video_writer = None
+        self._log_writer = None
 
         # Dummy frame
         self.frame = np.zeros((100,100,3),dtype=np.uint8)
 
         # Position processor
-        self.arduproc = ap.ArduProc(frame_resolution).loop()
-        self._last_pos = None
+        self.arduproc = ap.ArduProc(self, frame_resolution).loop()
 
         self._lock = Lock()
         self._updated = False
@@ -123,27 +123,9 @@ class ImageProcessor():
                 return
 
             new_frame = self._vs.read().copy()
-
-            # resized_frame = cv2.resize(new_frame, dsize=self.input_size_wh)
-            # self.interpreter.set_tensor(
-            #     self.input_idx,
-            #     resized_frame[np.newaxis,...].astype(np.float32)
-            # )
-            # self.interpreter.invoke()
-            # heatmap = np.squeeze(self.interpreter.get_tensor(
-            #     self.output_idx
-            # ))
-            # pos = np.unravel_index(heatmap.flatten().argmax(),
-            #                        self.output_size_hw)
-            # pos = np.multiply(pos, self.resize_ratio).astype(np.int)
-            # pos = tools.gravity(pos, self._last_pos)
-            # self._last_pos = pos
-            # self.arduproc.update_pos(pos)
-
-            # for area in pp.AREA:
-            #     new_frame = self.draw_area(new_frame, area, [255,255,0])
             
             with self._lock:
+                self.frame_count += 1
                 self._writer.stdin.write(new_frame[...,2::-1].tobytes())
                 self.frame = new_frame
                 self._updated = True
@@ -151,6 +133,27 @@ class ImageProcessor():
             # Reset writer every 30 mins
             if (time.time() - self._rec_start) > VID_TIME:
                 self.reset_writer()
+
+    def detect_head(self):
+        """detect_head
+        Detect head and return current position
+        """
+        new_frame = self._vs.read().copy()
+
+        resized_frame = cv2.resize(new_frame, dsize=self.input_size_wh)
+        self.interpreter.set_tensor(
+            self.input_idx,
+            resized_frame[np.newaxis,...].astype(np.float32)
+        )
+        self.interpreter.invoke()
+        heatmap = np.squeeze(self.interpreter.get_tensor(
+            self.output_idx
+        ))
+        pos = np.unravel_index(heatmap.flatten().argmax(),
+                               self.output_size_hw)
+        pos = np.multiply(pos, self.resize_ratio).astype(np.int)
+        return pos
+
 
     def draw_area(self, frame, area, color):
         r0 = area[0][0]
