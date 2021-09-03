@@ -42,7 +42,6 @@ class ImageProcessor():
         framerate : int
             imutils.video.VideoStream option
         """
-
         self.vid_dir = Path(vid_dir)
         self.frame_count = 0
         self.framerate = framerate
@@ -72,8 +71,6 @@ class ImageProcessor():
         # Dummy frame
         self.frame = np.zeros((100,100,3),dtype=np.uint8)
 
-        # Position processor
-        self.arduproc = ap.ArduProc(self, frame_resolution).loop()
 
         self._lock = Lock()
         self._updated = False
@@ -86,6 +83,10 @@ class ImageProcessor():
             resolution=self.frame_res,
             framerate=self.framerate,
         ).start()
+
+        # Start arduino (lazy start)
+        self.arduproc = ap.ArduProc(self, self.frame_res).loop()
+
         print('initiating...')
         time.sleep(2)
 
@@ -95,44 +96,73 @@ class ImageProcessor():
 
     def reset_writer(self):
         self._rec_start = time.time()
-        if self._writer is not None:
-            self._writer.stdin.close()
+        # Reset frame counting
+        self.frame_count = 0
+
+        if self._video_writer is not None:
+            self._video_writer.stdin.close()
+        if self._log_writer is not None:
+            self._log_writer.close()
+        
         now = datetime.now()
         rec_dir = self.vid_dir/now.strftime('%m_%d')
         if not rec_dir.exists():
             rec_dir.mkdir(parents=True)
         rec_name = now.strftime('%m_%d_%H_%M.ts')
-        self._writer = (
+        log_name = now.strftime('%m_%d_%H_%M.log')
+
+        # For logging
+        self.rec_path = str(rec_dir/rec_name)
+        self.log_path = str(rec_dir/log_name)
+
+        self._video_writer = (
             ffmpeg
             .input('pipe:', format='rawvideo', pix_fmt='rgb24', 
                     s=f'{self.frame_res[0]}x{self.frame_res[1]}',
                     loglevel='panic', framerate=self.framerate)
-            .output(str(rec_dir/rec_name),pix_fmt='yuv420p',
+            .output(self.rec_path,pix_fmt='yuv420p',
                     video_bitrate='0.8M')
             .overwrite_output()
             .run_async(pipe_stdin=True)
         )
+
+        self._log_writer = open(self.log_path,'w')
 
     def update(self):
         while True:
 
             if self._stopped:
                 self._vs.stop()
-                if self._writer is not None:
-                    self._writer.release()
+                if self._video_writer is not None:
+                    self._video_writer.release()
                 return
 
             new_frame = self._vs.read().copy()
             
             with self._lock:
                 self.frame_count += 1
-                self._writer.stdin.write(new_frame[...,2::-1].tobytes())
+                self._video_writer.stdin.write(new_frame[...,2::-1].tobytes())
                 self.frame = new_frame
                 self._updated = True
 
             # Reset writer every 30 mins
             if (time.time() - self._rec_start) > VID_TIME:
                 self.reset_writer()
+
+    def write_log(self, event_type, event_content):
+        now = datetime.now()
+        log_list = [
+            self.frame_count,
+            now.month,
+            now.day,
+            now.hour,
+            now.minute,
+            now.second,
+            event_type,
+            event_content,
+        ]
+        log_list = [str(s) for s in log_list]
+        self._log_writer.write(','.join(log_list)+'\n')
 
     def detect_head(self):
         """detect_head
