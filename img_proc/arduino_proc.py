@@ -213,7 +213,7 @@ class ArduProc():
         for r in range(4):
             for b in range(2):
                 if self._buttons_detected[r,b]:
-                    print('debug')
+                    print('debug'+str(button_pressed))
                     self.turn_on(r, 'button_leds', b)
                 else:
                     if time.time()-self._button_log[r,b]>0.2:
