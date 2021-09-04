@@ -217,7 +217,7 @@ class ArduProc():
                 else:
                     if time.time()-self._button_log[r,b]>0.2:
                         self.turn_off(r,'button_leds', b, no_log=True)
-                        self._button_log[r,b] = 0.0
+                        
 
 
         # TODO : change pin operation
