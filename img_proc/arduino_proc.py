@@ -344,7 +344,7 @@ class ArduProc():
         with self._lock:
             self._rooms[room][pin_type][index].write(1)
             self._detector.write_log(PIN_ON,
-                '/'.join(str(room),pin_type,str(index)))
+                '/'.join([str(room),pin_type,str(index)]))
 
     def turn_off(self, room, pin_type:str, index=0):
         """turn_off
@@ -362,7 +362,7 @@ class ArduProc():
         with self._lock:
             self._rooms[room][pin_type][index].write(0)
             self._detector.write_log(PIN_OFF,
-                '/'.join(str(room),pin_type,str(index)))
+                '/'.join([str(room),pin_type,str(index)]))
 
 
     def turn_on_timer(self, room, pin_type:str, index, sleep_time):
