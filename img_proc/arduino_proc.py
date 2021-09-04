@@ -187,9 +187,8 @@ class ArduProc():
 
         
         # Log when any button is pressed
-        button_pressed = False
-        if np.any(self._buttons_detected):
-            button_pressed = True
+        button_pressed = np.any(self._buttons_detected)
+        if button_pressed:
             rooms, buttons = np.where(self._buttons_detected)
             for room,button in zip(rooms,buttons):
                 self._detector.write_log(BUT_PRS, str(room)+'/'+str(button))
@@ -214,6 +213,7 @@ class ArduProc():
             for b in range(2):
                 if self._buttons_detected[r,b]:
                     print('debug'+str(button_pressed))
+                    print(self._buttons_detected)
                     self.turn_on(r, 'button_leds', b)
                 else:
                     if time.time()-self._button_log[r,b]>0.2:
