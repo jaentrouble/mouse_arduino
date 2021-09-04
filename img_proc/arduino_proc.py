@@ -5,9 +5,16 @@ import time
 from threading import Thread, Lock
 import random
 import datetime
-
-#TODO: erase
 from .detector import ImageProcessor
+import numpy as np
+
+BUT_PRS = 'button_pressed'
+CUR_POS = 'pos(x,y)'
+CUR_ROOM = 'current_room'
+
+# TODO : button detector on a seperate thread
+#  -> make a 'detected' list, and reset the list every update
+#  -> This makes sure that no button press is missed
 
 ARD_DIR = '/dev/ttyACM0'
 JACKPOT_PROB = 0.05
@@ -32,6 +39,8 @@ class ArduProc():
     """
     def __init__(self, detector:ImageProcessor, frame_res=(640,480), passive_mode=False):
         self._detector = detector
+        self.button_detected_reset()
+
         print('initializing board...')
         self._board = ArduinoMega(ARD_DIR)
         self._frame_res = frame_res
@@ -126,7 +135,6 @@ class ArduProc():
         print('board initialized')
 
         self._lock = Lock()
-        self._pos_lock = Lock()
         self._jackpot_prob = JACKPOT_PROB
         self._jackpot_delay = 600
         self._waiting = False
@@ -145,9 +153,24 @@ class ArduProc():
         """
         for l in self._leds:
             self.turn_off(l)
+
+    def _button_detect_loop_thread(self):
+        while True:
+            self.button_detection()
     
+    def button_detection(self):
+        for i, room in enumerate(self._rooms):
+            for j, button in enumerate(room['buttons']):
+                if button.read():
+                    self._buttons_detected[i,j] = True
+
+
+    def button_detected_reset(self):
+        self._buttons_detected = np.zeros((4,2),dtype=bool)
+
     def loop(self):
         Thread(target=self._loop_thread, daemon=True).start()
+        Thread(target=self._button_detect_loop_thread, daemon=True).start()
         return self
 
     def _loop_thread(self):
@@ -159,16 +182,29 @@ class ArduProc():
         This function is called every loop
         """
         now = datetime.datetime.now()
-        with self._pos_lock:
-            y, x = self._pos
-        if x>self._frame_res[0]/2 and y>self._frame_res[1]/2:
-            cur_room = 1
-        elif x<=self._frame_res[0]/2 and y>self._frame_res[1]/2:
-            cur_room = 0
-        elif x>self._frame_res[0]/2 and y<=self._frame_res[1]/2:
-            cur_room = 2
-        elif x<=self._frame_res[0]/2 and y<=self._frame_res[1]/2:
-            cur_room = 3
+
+        button_pressed = False
+        # Log when any button is pressed
+        if np.any(self._buttons_detected):
+            button_pressed = True
+            rooms, buttons = np.where(self._buttons_detected)
+            for room,button in zip(rooms,buttons):
+                self._detector.write_log(BUT_PRS, str(room)+'/'+str(button))
+
+
+        # TODO: check pos only when needed
+        if button_pressed:
+            y, x = self._detector.get_pos()
+            if x>self._frame_res[0]/2 and y>self._frame_res[1]/2:
+                cur_room = 1
+            elif x<=self._frame_res[0]/2 and y>self._frame_res[1]/2:
+                cur_room = 0
+            elif x>self._frame_res[0]/2 and y<=self._frame_res[1]/2:
+                cur_room = 2
+            elif x<=self._frame_res[0]/2 and y<=self._frame_res[1]/2:
+                cur_room = 3
+            self._detector.write_log(CUR_POS, str(x)+'/'+str(y))
+            self._detector.write_log(CUR_ROOM, str(cur_room))
 
 
         if (now.hour in TARGET_HOURS) and (now.minute in TARGET_MINS) \
@@ -218,9 +254,9 @@ class ArduProc():
             self.led_all_off()
             self._test_finished = False
 
-    def update_pos(self, pos):
-        with self._pos_lock:
-            self._pos = pos
+        # Reset button detection
+        self.button_detected_reset()
+
     
     def jackpot(self, room):
         """jackpot

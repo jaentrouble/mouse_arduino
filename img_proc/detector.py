@@ -10,7 +10,6 @@ from threading import Thread, Lock
 from img_proc import arduino_proc as ap
 from img_proc import tools
 
-# TODO: change reset method (add reseting frame count)
 
 VID_TIME = 1800
 
@@ -164,8 +163,8 @@ class ImageProcessor():
         log_list = [str(s) for s in log_list]
         self._log_writer.write(','.join(log_list)+'\n')
 
-    def detect_head(self):
-        """detect_head
+    def get_pos(self):
+        """get_pos
         Detect head and return current position
         """
         new_frame = self._vs.read().copy()
