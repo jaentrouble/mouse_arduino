@@ -14,9 +14,6 @@ CUR_ROOM = 'current_room'
 PIN_ON = 'pin_on'
 PIN_OFF = 'pin_off'
 
-# TODO : button detector on a seperate thread
-#  -> make a 'detected' list, and reset the list every update
-#  -> This makes sure that no button press is missed
 
 ARD_DIR = '/dev/ttyACM0'
 JACKPOT_PROB = 0.05
@@ -33,7 +30,6 @@ TARGET_MINS = list(range(0,60,20))
 TEST_TIME = 120
 INTER_BUTTON = 3
 
-# TODO : change position update method
 
 class ArduProc():
     """ArduProc
@@ -185,8 +181,9 @@ class ArduProc():
         """
         now = datetime.datetime.now()
 
-        button_pressed = False
+        
         # Log when any button is pressed
+        button_pressed = False
         if np.any(self._buttons_detected):
             button_pressed = True
             rooms, buttons = np.where(self._buttons_detected)
@@ -207,32 +204,42 @@ class ArduProc():
             self._detector.write_log(CUR_POS, str(x)+'/'+str(y))
             self._detector.write_log(CUR_ROOM, str(cur_room))
 
-        # TODO : change pin operation
-        if (now.hour in TARGET_HOURS) and (now.minute in TARGET_MINS) \
-            and not self._test_finished:
-            if not self._waiting:
-                self.led_all_off()
-                self._waiting = True
-                self._last_test = time.time()
-                self._target_rooms = []
-                clock_wise = random.random()<0.5
-                if clock_wise:
-                    # Target room, target button
-                    self._target_rooms.append(
-                        ((cur_room-2)%4, random.randint(0,1)))
-                    self._target_rooms.append(
-                        ((cur_room-1)%4, random.randint(0,1)))
-                    self.turn_on(self._target_rooms[1][0],'corridor_leds',0)
-                    self.turn_on(cur_room,'corridor_leds',0)
+        # Sanity check
+        # Turn on leds when button is pressed
+        for r in range(4):
+            for b in range(2):
+                if self._buttons_detected[r,b]:
+                    self.turn_on(r, 'button_leds', b)
                 else:
-                    self._target_rooms.append(
-                        ((cur_room+2)%4, random.randint(0,1)))
-                    self._target_rooms.append(
-                        ((cur_room+1)%4, random.randint(0,1)))
-                    self.turn_on(self._target_rooms[1][0],'corridor_leds',1)
-                    self.turn_on(cur_room,'corridor_leds',1)
-                for tr, tb in self._target_rooms:
-                    self.turn_on(tr,'button_leds',tb)
+                    self.turn_off(r,'button_leds', b)
+
+
+        # TODO : change pin operation
+        # if (now.hour in TARGET_HOURS) and (now.minute in TARGET_MINS) \
+        #     and not self._test_finished:
+        #     if not self._waiting:
+        #         self.led_all_off()
+        #         self._waiting = True
+        #         self._last_test = time.time()
+        #         self._target_rooms = []
+        #         clock_wise = random.random()<0.5
+        #         if clock_wise:
+        #             # Target room, target button
+        #             self._target_rooms.append(
+        #                 ((cur_room-2)%4, random.randint(0,1)))
+        #             self._target_rooms.append(
+        #                 ((cur_room-1)%4, random.randint(0,1)))
+        #             self.turn_on(self._target_rooms[1][0],'corridor_leds',0)
+        #             self.turn_on(cur_room,'corridor_leds',0)
+        #         else:
+        #             self._target_rooms.append(
+        #                 ((cur_room+2)%4, random.randint(0,1)))
+        #             self._target_rooms.append(
+        #                 ((cur_room+1)%4, random.randint(0,1)))
+        #             self.turn_on(self._target_rooms[1][0],'corridor_leds',1)
+        #             self.turn_on(cur_room,'corridor_leds',1)
+        #         for tr, tb in self._target_rooms:
+        #             self.turn_on(tr,'button_leds',tb)
 
         # if self._waiting:
         #     target_room = self._target_rooms[-1][0]
