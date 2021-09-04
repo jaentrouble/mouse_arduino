@@ -187,9 +187,12 @@ class ArduProc():
 
         
         # Log when any button is pressed
-        button_pressed = np.any(self._buttons_detected)
+        detection_hold =  self._buttons_detected.copy()
+        self.button_detected_reset()
+
+        button_pressed = np.any(detection_hold)
         if button_pressed:
-            rooms, buttons = np.where(self._buttons_detected)
+            rooms, buttons = np.where(detection_hold)
             for room,button in zip(rooms,buttons):
                 self._detector.write_log(BUT_PRS, str(room)+'/'+str(button))
 
@@ -211,9 +214,9 @@ class ArduProc():
         # Turn on leds when button is pressed
         for r in range(4):
             for b in range(2):
-                if self._buttons_detected[r,b]:
+                if detection_hold[r,b]:
                     print('debug'+str(button_pressed))
-                    print(self._buttons_detected)
+                    print(detection_hold)
                     self.turn_on(r, 'button_leds', b)
                 else:
                     if time.time()-self._button_log[r,b]>0.2:
@@ -269,8 +272,6 @@ class ArduProc():
         #     self.led_all_off()
         #     self._test_finished = False
 
-        # Reset button detection
-        self.button_detected_reset()
 
     
     def jackpot(self, room):
