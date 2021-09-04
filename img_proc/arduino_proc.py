@@ -147,10 +147,11 @@ class ArduProc():
     def led_all_off(self):
         """led_all_off
         Turn off all LEDs
-
         """
-        for l in self._leds:
-            self.turn_off(l)
+        for r in range(4):
+            for l in range(2):
+                self.turn_off(r, 'corridor_leds', l)
+                self.turn_off(r, 'button_leds', l)
 
     def _button_detect_loop_thread(self):
         while True:
