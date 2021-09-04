@@ -161,10 +161,8 @@ class ArduProc():
     def button_detection(self):
         for i, room in enumerate(self._rooms):
             for j, button in enumerate(room['buttons']):
-                if time.time() - self._button_log[i,j] > 0.2:
-                    if button.read():
-                        self._buttons_detected[i,j] = True
-                        self._button_log[i,j] = time.time()
+                if button.read():
+                    self._buttons_detected[i,j] = True
 
 
     def button_detected_reset(self):
@@ -183,6 +181,7 @@ class ArduProc():
         """update
         This function is called every loop
         """
+        time.sleep(0.1)
         # now = datetime.datetime.now()
 
         
@@ -217,8 +216,7 @@ class ArduProc():
                 if detection_hold[r,b]:
                     self.turn_on(r, 'button_leds', b)
                 else:
-                    if time.time()-self._button_log[r,b]>0.2:
-                        self.turn_off(r,'button_leds', b, no_log=True)
+                    self.turn_off(r,'button_leds', b, no_log=True)
                         
 
 
