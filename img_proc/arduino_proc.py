@@ -5,7 +5,7 @@ import time
 from threading import Thread, Lock
 import random
 import datetime
-from .detector import ImageProcessor
+from img_proc.detector import ImageProcessor
 import numpy as np
 
 BUT_PRS = 'button_pressed'
