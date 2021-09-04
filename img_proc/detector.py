@@ -160,8 +160,10 @@ class ImageProcessor():
             event_type,
             event_content,
         ]
-        log_list = [str(s) for s in log_list]
-        self._log_writer.write(','.join(log_list)+'\n')
+        log_str = ','.join([str(s) for s in log_list])+'\n'
+        print(self.log_path)
+        print(log_str)
+        self._log_writer.write(log_str)
 
     def get_pos(self):
         """get_pos
