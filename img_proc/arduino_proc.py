@@ -162,7 +162,7 @@ class ArduProc():
         for i, room in enumerate(self._rooms):
             for j, button in enumerate(room['buttons']):
                 if button.read():
-                    if time.time() - self._button_log[i,j] > 0.1:
+                    if time.time() - self._button_log[i,j] > 1:
                         self._buttons_detected[i,j] = True
                         self._button_log[i,j] = time.time()
 
