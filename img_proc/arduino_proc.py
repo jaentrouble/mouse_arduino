@@ -38,6 +38,7 @@ class ArduProc():
     def __init__(self, detector:ImageProcessor, frame_res=(640,480), passive_mode=False):
         self._detector = detector
         self.button_detected_reset()
+        self._button_log = np.zeros((4,2))
 
         print('initializing board...')
         self._board = ArduinoMega(ARD_DIR)
@@ -161,7 +162,9 @@ class ArduProc():
         for i, room in enumerate(self._rooms):
             for j, button in enumerate(room['buttons']):
                 if button.read():
-                    self._buttons_detected[i,j] = True
+                    if time.time() - self._button_log[i,j] > 0.1:
+                        self._buttons_detected[i,j] = True
+                        self._button_log[i,j] = time.time()
 
 
     def button_detected_reset(self):
@@ -212,7 +215,9 @@ class ArduProc():
                 if self._buttons_detected[r,b]:
                     self.turn_on(r, 'button_leds', b)
                 else:
-                    self.turn_off(r,'button_leds', b, no_log=True)
+                    if time.time()-self._button_log[r,b]>0.2:
+                        self.turn_off(r,'button_leds', b, no_log=True)
+                        self._button_log[r,b] = 0.0
 
 
         # TODO : change pin operation
