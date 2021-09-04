@@ -179,7 +179,7 @@ class ArduProc():
         """update
         This function is called every loop
         """
-        now = datetime.datetime.now()
+        # now = datetime.datetime.now()
 
         
         # Log when any button is pressed
