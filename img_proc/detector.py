@@ -145,7 +145,7 @@ class ImageProcessor():
                 self.reset_writer()
 
     def write_log(self, event_type, event_content):
-        with open(self.log_path,'wa') as log_writer:
+        with open(self.log_path,'a') as log_writer:
             now = datetime.now()
             log_list = [
                 self.frame_count,
