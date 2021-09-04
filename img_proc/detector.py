@@ -64,7 +64,6 @@ class ImageProcessor():
         self.resize_ratio = np.divide(self.frame_res_hw, self.output_size_hw)
 
         self._video_writer = None
-        self._log_writer = None
 
         # Dummy frame
         self.frame = np.zeros((100,100,3),dtype=np.uint8)
@@ -100,8 +99,6 @@ class ImageProcessor():
 
         if self._video_writer is not None:
             self._video_writer.stdin.close()
-        if self._log_writer is not None:
-            self._log_writer.close()
         
         now = datetime.now()
         rec_dir = self.vid_dir/now.strftime('%m_%d')
@@ -125,7 +122,6 @@ class ImageProcessor():
             .run_async(pipe_stdin=True)
         )
 
-        self._log_writer = open(self.log_path,'w')
 
     def update(self):
         while True:
@@ -149,21 +145,22 @@ class ImageProcessor():
                 self.reset_writer()
 
     def write_log(self, event_type, event_content):
-        now = datetime.now()
-        log_list = [
-            self.frame_count,
-            now.month,
-            now.day,
-            now.hour,
-            now.minute,
-            now.second,
-            event_type,
-            event_content,
-        ]
-        log_str = ','.join([str(s) for s in log_list])+'\n'
-        print(self.log_path)
-        print(log_str)
-        self._log_writer.write(log_str)
+        with open(self.log_path,'wa') as log_writer:
+            now = datetime.now()
+            log_list = [
+                self.frame_count,
+                now.month,
+                now.day,
+                now.hour,
+                now.minute,
+                now.second,
+                event_type,
+                event_content,
+            ]
+            log_str = ','.join([str(s) for s in log_list])+'\n'
+            print(self.log_path)
+            print(log_str)
+            log_writer.write(log_str)
 
     def get_pos(self):
         """get_pos
