@@ -212,7 +212,7 @@ class ArduProc():
                 if self._buttons_detected[r,b]:
                     self.turn_on(r, 'button_leds', b)
                 else:
-                    self.turn_off(r,'button_leds', b)
+                    self.turn_off(r,'button_leds', b, no_log=True)
 
 
         # TODO : change pin operation
@@ -346,7 +346,7 @@ class ArduProc():
             self._detector.write_log(PIN_ON,
                 '/'.join([str(room),pin_type,str(index)]))
 
-    def turn_off(self, room, pin_type:str, index=0):
+    def turn_off(self, room, pin_type:str, index=0, no_log=False):
         """turn_off
         Turn off specified pin
 
@@ -361,8 +361,9 @@ class ArduProc():
         """
         with self._lock:
             self._rooms[room][pin_type][index].write(0)
-            self._detector.write_log(PIN_OFF,
-                '/'.join([str(room),pin_type,str(index)]))
+            if not no_log:
+                self._detector.write_log(PIN_OFF,
+                    '/'.join([str(room),pin_type,str(index)]))
 
 
     def turn_on_timer(self, room, pin_type:str, index, sleep_time):
