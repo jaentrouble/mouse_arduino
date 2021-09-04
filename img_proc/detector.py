@@ -7,7 +7,6 @@ from pathlib import Path
 from datetime import datetime
 import time
 from threading import Thread, Lock
-from img_proc import arduino_proc as ap
 from img_proc import tools
 
 
@@ -84,6 +83,7 @@ class ImageProcessor():
         ).start()
 
         # Start arduino (lazy start)
+        from img_proc import arduino_proc as ap
         self.arduproc = ap.ArduProc(self, self.frame_res).loop()
 
         print('initiating...')
