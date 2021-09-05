@@ -20,7 +20,7 @@ JACKPOT_PROB = 0.05
 JACKPOT_COOLTIME = 0
 JACKPOT_BURSTS = 20
 NORMAL_BURSTS = 3
-NORMAL_COOLTIME = 0
+NORMAL_COOLTIME = 300
 
 BURST_INTERVAL = 0.2
 BURST_DURATION = 0.05
@@ -210,6 +210,7 @@ class ArduProc():
             for b in range(2):
                 if self._buttons_detected[r,b]:
                     self.turn_on(r, 'button_leds', b)
+                    self.normal_reward(r)
                 else:
                     self.turn_off(r,'button_leds', b)
 
