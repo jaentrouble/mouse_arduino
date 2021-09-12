@@ -126,3 +126,4 @@ dmypy.json
 
 .vscode/
 savedmodels/
+data_analyzer/logs/
