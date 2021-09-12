@@ -1,4 +1,5 @@
 def line_to_dict(log_line:str):
+    log_line = log_line.replace('x,y','x_y')
     f, m, d, hh, mm, ss, name, data = log_line.split(',')
     return {
         'frame' : int(f),
