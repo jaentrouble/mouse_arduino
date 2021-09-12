@@ -9,7 +9,7 @@ from .detector import ImageProcessor
 import numpy as np
 
 BUT_PRS = 'button_pressed'
-CUR_POS = 'pos(x,y)'
+CUR_POS = 'pos(x_y)'
 CUR_ROOM = 'current_room'
 PIN_ON = 'pin_on'
 PIN_OFF = 'pin_off'
@@ -188,7 +188,6 @@ class ArduProc():
         # Log when any button is pressed
         detection_hold =  self._buttons_detected.copy()
         self.button_detected_reset()
-
         button_pressed = np.any(detection_hold)
         if button_pressed:
             rooms, buttons = np.where(detection_hold)
