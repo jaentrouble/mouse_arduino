@@ -13,7 +13,10 @@ CUR_POS = 'pos(x_y)'
 CUR_ROOM = 'current_room'
 PIN_ON = 'pin_on'
 PIN_OFF = 'pin_off'
-
+NOR_REW = 'normal_reward'
+FAILED = 'failed'
+TIME_OVR = 'time_over'
+TEST_ST = 'test_start'
 
 ARD_DIR = '/dev/ttyACM0'
 JACKPOT_PROB = 0.05
@@ -25,8 +28,9 @@ NORMAL_COOLTIME = 300
 BURST_INTERVAL = 0.2
 BURST_DURATION = 0.05
 
-TARGET_HOURS = list(range(0,7)) + list(range(22,24))
-TARGET_MINS = list(range(0,60,20))
+# TARGET_HOURS = list(range(0,7)) + list(range(22,24))
+TARGET_HOURS = list(range(7,19))
+TARGET_MINS = list(range(0,60,10))
 TEST_TIME = 120
 INTER_BUTTON = 3
 
@@ -182,7 +186,7 @@ class ArduProc():
         This function is called every loop
         """
         time.sleep(0.1)
-        # now = datetime.datetime.now()
+        now = datetime.datetime.now()
 
         
         # Log when any button is pressed
@@ -210,63 +214,60 @@ class ArduProc():
 
         # Sanity check
         # Turn on leds when button is pressed
-        for r in range(4):
-            for b in range(2):
-                if detection_hold[r,b]:
-                    self.turn_on(r, 'button_leds', b)
-                    self.normal_reward(r)
-                else:
-                    self.turn_off(r,'button_leds', b, no_log=True)
+        # for r in range(4):
+        #     for b in range(2):
+        #         if detection_hold[r,b]:
+        #             self.turn_on(r, 'button_leds', b)
+        #             self.normal_reward(r)
+        #         else:
+        #             self.turn_off(r,'button_leds', b, no_log=True)
                         
 
 
-        # TODO : change pin operation
-        # if (now.hour in TARGET_HOURS) and (now.minute in TARGET_MINS) \
-        #     and not self._test_finished:
-        #     if not self._waiting:
-        #         self.led_all_off()
-        #         self._waiting = True
-        #         self._last_test = time.time()
-        #         self._target_rooms = []
-        #         clock_wise = random.random()<0.5
-        #         if clock_wise:
-        #             # Target room, target button
-        #             self._target_rooms.append(
-        #                 ((cur_room-2)%4, random.randint(0,1)))
-        #             self._target_rooms.append(
-        #                 ((cur_room-1)%4, random.randint(0,1)))
-        #             self.turn_on(self._target_rooms[1][0],'corridor_leds',0)
-        #             self.turn_on(cur_room,'corridor_leds',0)
-        #         else:
-        #             self._target_rooms.append(
-        #                 ((cur_room+2)%4, random.randint(0,1)))
-        #             self._target_rooms.append(
-        #                 ((cur_room+1)%4, random.randint(0,1)))
-        #             self.turn_on(self._target_rooms[1][0],'corridor_leds',1)
-        #             self.turn_on(cur_room,'corridor_leds',1)
-        #         for tr, tb in self._target_rooms:
-        #             self.turn_on(tr,'button_leds',tb)
+        if (now.hour in TARGET_HOURS) and (now.minute in TARGET_MINS) \
+            and not self._test_finished:
+            if not self._waiting:
+                self.led_all_off()
+                self._waiting = True
+                self._last_test = time.time()
+                self._target_room = (cur_room+2)%4
+                self._target_button = random.randint(0,1)
+                self._detector.write_log(
+                    TEST_ST,
+                    str(self._target_room)+'/'+str(self._target_button)
+                )
+                # Both way
+                self.turn_on(cur_room,'corridor_leds',0)
+                self.turn_on(cur_room,'corridor_leds',1)
+                self.turn_on((cur_room+1)%4,'corridor_leds',1)
+                self.turn_on((cur_room-1)%4,'corridor_leds',0)
 
-        # if self._waiting:
-        #     target_room = self._target_rooms[-1][0]
-        #     target_idx = self._target_rooms[-1][1]
-        #     target_button = target_room['buttons'][target_idx]
-        #     if not target_button.read() and \
-        #         time.time()-self._last_button>INTER_BUTTON:
-        #         self._last_button = time.time()
-        #         self._target_rooms.pop()
-        #         if len(self._target_rooms)>0:
-        #             self.turn_off(target_room['button_leds'][target_idx])
-        #             self.normal_reward(target_room)
-        #         else:
-        #             self.led_all_off()
-        #             self.jackpot(target_room)
-        #             self._waiting = False
-        #             self._test_finished = True
-        # if time.time()- self._last_test>TEST_TIME:
-        #     self._waiting = False
-        #     self.led_all_off()
-        #     self._test_finished = False
+        if self._waiting:
+            # target_room = self._target_rooms[-1][0]
+            # target_idx = self._target_rooms[-1][1]
+            # target_button = target_room['buttons'][target_idx]
+            if button_pressed:
+                if detection_hold[self._target_room,self._target_button]:
+                    self.normal_reward(self._target_room)
+                    self._detector.write_log(NOR_REW, 
+                        str(self._target_room)+'/'+str(self._target_button))
+                else:
+                    self._detector.write_log(FAILED, 
+                        str(self._target_room)+'/'+str(self._target_button))
+                self.led_all_off()
+                self._waiting = False
+                self._test_finished = True
+
+
+        if time.time()- self._last_test>TEST_TIME:
+            if self._waiting:
+                self._detector.write_log(
+                    TIME_OVR,
+                    str(self._target_room)+'/'+str(self._target_button)
+                )
+            self._waiting = False
+            self.led_all_off()
+            self._test_finished = False
 
 
     
