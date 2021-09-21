@@ -199,18 +199,18 @@ class ArduProc():
                 self._detector.write_log(BUT_PRS, str(room)+'/'+str(button))
 
 
-        if button_pressed:
-            y, x = self._detector.get_pos()
-            if x>self._frame_res[0]/2 and y>self._frame_res[1]/2:
-                cur_room = 1
-            elif x<=self._frame_res[0]/2 and y>self._frame_res[1]/2:
-                cur_room = 0
-            elif x>self._frame_res[0]/2 and y<=self._frame_res[1]/2:
-                cur_room = 2
-            elif x<=self._frame_res[0]/2 and y<=self._frame_res[1]/2:
-                cur_room = 3
-            self._detector.write_log(CUR_POS, str(x)+'/'+str(y))
-            self._detector.write_log(CUR_ROOM, str(cur_room))
+        # if button_pressed:
+        #     y, x = self._detector.get_pos()
+        #     if x>self._frame_res[0]/2 and y>self._frame_res[1]/2:
+        #         cur_room = 1
+        #     elif x<=self._frame_res[0]/2 and y>self._frame_res[1]/2:
+        #         cur_room = 0
+        #     elif x>self._frame_res[0]/2 and y<=self._frame_res[1]/2:
+        #         cur_room = 2
+        #     elif x<=self._frame_res[0]/2 and y<=self._frame_res[1]/2:
+        #         cur_room = 3
+        #     self._detector.write_log(CUR_POS, str(x)+'/'+str(y))
+        #     self._detector.write_log(CUR_ROOM, str(cur_room))
 
         # Sanity check
         # Turn on leds when button is pressed
@@ -227,6 +227,17 @@ class ArduProc():
         if (now.hour in TARGET_HOURS) and (now.minute in TARGET_MINS) \
             and not self._test_finished:
             if not self._waiting:
+                y, x = self._detector.get_pos()
+                if x>self._frame_res[0]/2 and y>self._frame_res[1]/2:
+                    cur_room = 1
+                elif x<=self._frame_res[0]/2 and y>self._frame_res[1]/2:
+                    cur_room = 0
+                elif x>self._frame_res[0]/2 and y<=self._frame_res[1]/2:
+                    cur_room = 2
+                elif x<=self._frame_res[0]/2 and y<=self._frame_res[1]/2:
+                    cur_room = 3
+                self._detector.write_log(CUR_POS, str(x)+'/'+str(y))
+                self._detector.write_log(CUR_ROOM, str(cur_room))
                 self.led_all_off()
                 self._waiting = True
                 self._last_test = time.time()
@@ -265,9 +276,10 @@ class ArduProc():
                     TIME_OVR,
                     str(self._target_room)+'/'+str(self._target_button)
                 )
-            self._waiting = False
-            self.led_all_off()
-            self._test_finished = False
+                self._waiting = False
+                self.led_all_off()
+            if self._test_finished:
+                self._test_finished = False
 
 
     
