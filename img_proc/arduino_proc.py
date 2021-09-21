@@ -9,21 +9,18 @@ from .detector import ImageProcessor
 import numpy as np
 
 BUT_PRS = 'button_pressed'
-CUR_POS = 'pos(x,y)'
+CUR_POS = 'pos(x_y)'
 CUR_ROOM = 'current_room'
 PIN_ON = 'pin_on'
 PIN_OFF = 'pin_off'
 
-# TODO : button detector on a seperate thread
-#  -> make a 'detected' list, and reset the list every update
-#  -> This makes sure that no button press is missed
 
 ARD_DIR = '/dev/ttyACM0'
 JACKPOT_PROB = 0.05
 JACKPOT_COOLTIME = 0
 JACKPOT_BURSTS = 20
 NORMAL_BURSTS = 3
-NORMAL_COOLTIME = 0
+NORMAL_COOLTIME = 300
 
 BURST_INTERVAL = 0.2
 BURST_DURATION = 0.05
@@ -33,7 +30,6 @@ TARGET_MINS = list(range(0,60,20))
 TEST_TIME = 120
 INTER_BUTTON = 3
 
-# TODO : change position update method
 
 class ArduProc():
     """ArduProc
@@ -42,6 +38,7 @@ class ArduProc():
     def __init__(self, detector:ImageProcessor, frame_res=(640,480), passive_mode=False):
         self._detector = detector
         self.button_detected_reset()
+        self._button_log = np.zeros((4,2))
 
         print('initializing board...')
         self._board = ArduinoMega(ARD_DIR)
@@ -151,10 +148,11 @@ class ArduProc():
     def led_all_off(self):
         """led_all_off
         Turn off all LEDs
-
         """
-        for l in self._leds:
-            self.turn_off(l)
+        for r in range(4):
+            for l in range(2):
+                self.turn_off(r, 'corridor_leds', l)
+                self.turn_off(r, 'button_leds', l)
 
     def _button_detect_loop_thread(self):
         while True:
@@ -183,13 +181,16 @@ class ArduProc():
         """update
         This function is called every loop
         """
-        now = datetime.datetime.now()
+        time.sleep(0.1)
+        # now = datetime.datetime.now()
 
-        button_pressed = False
+        
         # Log when any button is pressed
-        if np.any(self._buttons_detected):
-            button_pressed = True
-            rooms, buttons = np.where(self._buttons_detected)
+        detection_hold =  self._buttons_detected.copy()
+        self.button_detected_reset()
+        button_pressed = np.any(detection_hold)
+        if button_pressed:
+            rooms, buttons = np.where(detection_hold)
             for room,button in zip(rooms,buttons):
                 self._detector.write_log(BUT_PRS, str(room)+'/'+str(button))
 
@@ -207,32 +208,44 @@ class ArduProc():
             self._detector.write_log(CUR_POS, str(x)+'/'+str(y))
             self._detector.write_log(CUR_ROOM, str(cur_room))
 
-        # TODO : change pin operation
-        if (now.hour in TARGET_HOURS) and (now.minute in TARGET_MINS) \
-            and not self._test_finished:
-            if not self._waiting:
-                self.led_all_off()
-                self._waiting = True
-                self._last_test = time.time()
-                self._target_rooms = []
-                clock_wise = random.random()<0.5
-                if clock_wise:
-                    # Target room, target button
-                    self._target_rooms.append(
-                        ((cur_room-2)%4, random.randint(0,1)))
-                    self._target_rooms.append(
-                        ((cur_room-1)%4, random.randint(0,1)))
-                    self.turn_on(self._target_rooms[1][0],'corridor_leds',0)
-                    self.turn_on(cur_room,'corridor_leds',0)
+        # Sanity check
+        # Turn on leds when button is pressed
+        for r in range(4):
+            for b in range(2):
+                if detection_hold[r,b]:
+                    self.turn_on(r, 'button_leds', b)
+                    self.normal_reward(r)
                 else:
-                    self._target_rooms.append(
-                        ((cur_room+2)%4, random.randint(0,1)))
-                    self._target_rooms.append(
-                        ((cur_room+1)%4, random.randint(0,1)))
-                    self.turn_on(self._target_rooms[1][0],'corridor_leds',1)
-                    self.turn_on(cur_room,'corridor_leds',1)
-                for tr, tb in self._target_rooms:
-                    self.turn_on(tr,'button_leds',tb)
+                    self.turn_off(r,'button_leds', b, no_log=True)
+                        
+
+
+        # TODO : change pin operation
+        # if (now.hour in TARGET_HOURS) and (now.minute in TARGET_MINS) \
+        #     and not self._test_finished:
+        #     if not self._waiting:
+        #         self.led_all_off()
+        #         self._waiting = True
+        #         self._last_test = time.time()
+        #         self._target_rooms = []
+        #         clock_wise = random.random()<0.5
+        #         if clock_wise:
+        #             # Target room, target button
+        #             self._target_rooms.append(
+        #                 ((cur_room-2)%4, random.randint(0,1)))
+        #             self._target_rooms.append(
+        #                 ((cur_room-1)%4, random.randint(0,1)))
+        #             self.turn_on(self._target_rooms[1][0],'corridor_leds',0)
+        #             self.turn_on(cur_room,'corridor_leds',0)
+        #         else:
+        #             self._target_rooms.append(
+        #                 ((cur_room+2)%4, random.randint(0,1)))
+        #             self._target_rooms.append(
+        #                 ((cur_room+1)%4, random.randint(0,1)))
+        #             self.turn_on(self._target_rooms[1][0],'corridor_leds',1)
+        #             self.turn_on(cur_room,'corridor_leds',1)
+        #         for tr, tb in self._target_rooms:
+        #             self.turn_on(tr,'button_leds',tb)
 
         # if self._waiting:
         #     target_room = self._target_rooms[-1][0]
@@ -255,8 +268,6 @@ class ArduProc():
         #     self.led_all_off()
         #     self._test_finished = False
 
-        # Reset button detection
-        self.button_detected_reset()
 
     
     def jackpot(self, room):
@@ -336,9 +347,9 @@ class ArduProc():
         with self._lock:
             self._rooms[room][pin_type][index].write(1)
             self._detector.write_log(PIN_ON,
-                '/'.join(str(room),pin_type,str(index)))
+                '/'.join([str(room),pin_type,str(index)]))
 
-    def turn_off(self, room, pin_type:str, index=0):
+    def turn_off(self, room, pin_type:str, index=0, no_log=False):
         """turn_off
         Turn off specified pin
 
@@ -353,8 +364,9 @@ class ArduProc():
         """
         with self._lock:
             self._rooms[room][pin_type][index].write(0)
-            self._detector.write_log(PIN_OFF,
-                '/'.join(str(room),pin_type,str(index)))
+            if not no_log:
+                self._detector.write_log(PIN_OFF,
+                    '/'.join([str(room),pin_type,str(index)]))
 
 
     def turn_on_timer(self, room, pin_type:str, index, sleep_time):
