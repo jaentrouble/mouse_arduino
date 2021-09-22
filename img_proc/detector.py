@@ -140,8 +140,8 @@ class ImageProcessor():
 
                 # TODO: if too laggy, delete
                 r, c = self.get_pos()
-                drawn_frame = new_frame[r,c] = (255,0,0)
-                self.frame = drawn_frame
+                new_frame[r,c] = (255,0,0)
+                self.frame = new_frame
                 self._updated = True
 
             # Reset writer every 30 mins
