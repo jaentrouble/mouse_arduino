@@ -140,7 +140,7 @@ class ImageProcessor():
 
                 # TODO: if too laggy, delete
                 r, c = self.get_pos()
-                new_frame[r,c] = (255,0,0)
+                new_frame[r:r+5,c:c+5] = (255,0,0)
                 self.frame = new_frame
                 self._updated = True
 
