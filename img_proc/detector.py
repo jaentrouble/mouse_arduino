@@ -70,6 +70,7 @@ class ImageProcessor():
 
 
         self._lock = Lock()
+        self._pos_lock = Lock()
         self._updated = False
         self._stopped = False
 
@@ -170,24 +171,25 @@ class ImageProcessor():
         """get_pos
         Detect head and return current position
         """
-        if img is not None:
-            new_frame = img
-        else:
-            new_frame = self._vs.read().copy()
+        with self._pos_lock:
+            if img is not None:
+                new_frame = img
+            else:
+                new_frame = self._vs.read().copy()
 
-        resized_frame = cv2.resize(new_frame, dsize=self.input_size_wh)
-        self.interpreter.set_tensor(
-            self.input_idx,
-            resized_frame[np.newaxis,...].astype(np.float32).copy()
-        )
-        self.interpreter.invoke()
-        heatmap = np.squeeze(self.interpreter.get_tensor(
-            self.output_idx
-        ))
-        pos = np.unravel_index(heatmap.flatten().argmax(),
-                               self.output_size_hw)
-        pos = np.multiply(pos, self.resize_ratio).astype(np.int)
-        return pos
+            resized_frame = cv2.resize(new_frame, dsize=self.input_size_wh)
+            self.interpreter.set_tensor(
+                self.input_idx,
+                resized_frame[np.newaxis,...].astype(np.float32)
+            )
+            self.interpreter.invoke()
+            heatmap = np.squeeze(self.interpreter.get_tensor(
+                self.output_idx
+            ))
+            pos = np.unravel_index(heatmap.flatten().argmax(),
+                                self.output_size_hw)
+            pos = np.multiply(pos, self.resize_ratio).astype(np.int)
+            return pos
 
 
     def draw_area(self, frame, area, color):
