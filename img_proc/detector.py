@@ -178,12 +178,12 @@ class ImageProcessor():
         resized_frame = cv2.resize(new_frame, dsize=self.input_size_wh)
         self.interpreter.set_tensor(
             self.input_idx,
-            resized_frame[np.newaxis,...].astype(np.float32)
+            resized_frame[np.newaxis,...].astype(np.float32).copy()
         )
         self.interpreter.invoke()
         heatmap = np.squeeze(self.interpreter.get_tensor(
             self.output_idx
-        ).copy())
+        ))
         pos = np.unravel_index(heatmap.flatten().argmax(),
                                self.output_size_hw)
         pos = np.multiply(pos, self.resize_ratio).astype(np.int)
