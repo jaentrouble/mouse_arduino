@@ -137,7 +137,11 @@ class ImageProcessor():
             with self._lock:
                 self.frame_count += 1
                 self._video_writer.stdin.write(new_frame[...,2::-1].tobytes())
-                self.frame = new_frame
+
+                # TODO: if too laggy, delete
+                r, c = self.get_pos()
+                drawn_frame = new_frame[r,c] = (255,0,0)
+                self.frame = drawn_frame
                 self._updated = True
 
             # Reset writer every 30 mins

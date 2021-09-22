@@ -252,6 +252,7 @@ class ArduProc():
                 self.turn_on(cur_room,'corridor_leds',1)
                 self.turn_on((cur_room+1)%4,'corridor_leds',1)
                 self.turn_on((cur_room-1)%4,'corridor_leds',0)
+                self.turn_on(self._target_room,'button_leds',self._target_button)
 
         if self._waiting:
             # target_room = self._target_rooms[-1][0]
