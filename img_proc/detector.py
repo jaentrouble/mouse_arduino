@@ -139,7 +139,7 @@ class ImageProcessor():
                 self._video_writer.stdin.write(new_frame[...,2::-1].tobytes())
 
                 # TODO: if too laggy, delete
-                r, c = self.get_pos()
+                r, c = self.get_pos(img=new_frame)
                 new_frame[r:r+5,c:c+5] = (255,0,0)
                 self.frame = new_frame
                 self._updated = True
@@ -166,11 +166,14 @@ class ImageProcessor():
             print(log_str)
             log_writer.write(log_str)
 
-    def get_pos(self):
+    def get_pos(self, img = None):
         """get_pos
         Detect head and return current position
         """
-        new_frame = self._vs.read().copy()
+        if img is not None:
+            new_frame = img
+        else:
+            new_frame = self._vs.read().copy()
 
         resized_frame = cv2.resize(new_frame, dsize=self.input_size_wh)
         self.interpreter.set_tensor(
@@ -180,7 +183,7 @@ class ImageProcessor():
         self.interpreter.invoke()
         heatmap = np.squeeze(self.interpreter.get_tensor(
             self.output_idx
-        ))
+        ).copy())
         pos = np.unravel_index(heatmap.flatten().argmax(),
                                self.output_size_hw)
         pos = np.multiply(pos, self.resize_ratio).astype(np.int)
