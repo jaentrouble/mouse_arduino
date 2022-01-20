@@ -167,6 +167,7 @@ class ArduProc():
         for i, room in enumerate(self._rooms):
             for j, button in enumerate(room['buttons']):
                 if button.read():
+                    print(j)
                     self._buttons_detected[i,j] = True
 
 
@@ -197,6 +198,7 @@ class ArduProc():
         if button_pressed:
             rooms, buttons = np.where(detection_hold)
             for room,button in zip(rooms,buttons):
+                print(detection_hold)
                 self._detector.write_log(BUT_PRS, str(room)+'/'+str(button))
 
 
