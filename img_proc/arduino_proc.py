@@ -29,8 +29,8 @@ NORMAL_COOLTIME = 300
 BURST_INTERVAL = 0.2
 BURST_DURATION = 0.05
 
-# TARGET_HOURS = list(range(0,7)) + list(range(22,24))
-TARGET_HOURS = list(range(7,19))
+TARGET_HOURS = list(range(0,7)) + list(range(22,24))
+# TARGET_HOURS = list(range(7,19))
 TARGET_MINS = list(range(0,60,10))
 TEST_TIME = 120
 INTER_BUTTON = 3
@@ -193,7 +193,6 @@ class ArduProc():
         # Log when any button is pressed
         detection_hold =  self._buttons_detected.copy()
         self.button_detected_reset()
-        print(self._board.digital[29].read())
         button_pressed = np.any(detection_hold)
         if button_pressed:
             rooms, buttons = np.where(detection_hold)
