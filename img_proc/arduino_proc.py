@@ -17,6 +17,7 @@ NOR_REW = 'normal_reward'
 FAILED = 'failed'
 TIME_OVR = 'time_over'
 TEST_ST = 'test_start'
+WRONG = 'wrong'
 
 ARD_DIR = '/dev/ttyACM0'
 JACKPOT_PROB = 0.05
@@ -263,12 +264,13 @@ class ArduProc():
                     self.normal_reward(self._target_room)
                     self._detector.write_log(NOR_REW, 
                         str(self._target_room)+'/'+str(self._target_button))
+                    self.led_all_off()
+                    self._waiting = False
+                    self._test_finished = True
+
                 else:
-                    self._detector.write_log(FAILED, 
+                    self._detector.write_log(WRONG, 
                         str(self._target_room)+'/'+str(self._target_button))
-                self.led_all_off()
-                self._waiting = False
-                self._test_finished = True
 
 
         if time.time()- self._last_test>TEST_TIME:
