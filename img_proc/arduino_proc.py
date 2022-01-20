@@ -193,6 +193,7 @@ class ArduProc():
         # Log when any button is pressed
         detection_hold =  self._buttons_detected.copy()
         self.button_detected_reset()
+        print(self._board.digital[29].read())
         button_pressed = np.any(detection_hold)
         if button_pressed:
             rooms, buttons = np.where(detection_hold)
