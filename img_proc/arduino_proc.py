@@ -29,8 +29,8 @@ NORMAL_COOLTIME = 300
 BURST_INTERVAL = 0.2
 BURST_DURATION = 0.05
 
-TARGET_HOURS = list(range(0,7)) + list(range(22,24))
-# TARGET_HOURS = list(range(7,19))
+# TARGET_HOURS = list(range(0,7)) + list(range(22,24))
+TARGET_HOURS = list(range(7,19))
 TARGET_MINS = list(range(0,60,10))
 TEST_TIME = 120
 INTER_BUTTON = 3
